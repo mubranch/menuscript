@@ -6,6 +6,7 @@ import os
 import shutil
 import webbrowser
 import logging
+from alerts import Alert
 
 logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
 
@@ -92,15 +93,17 @@ def execute(item: dict[ScriptItem], _) -> any:
         logging.error(
             f" '(script)[{s_path}]' in user_config.txt is an invalid file path."
         )
+        Alert(title="Error", message="Invalid file path in user_config.txt").alert()
         return
 
     if not os.path.exists(v_path):
-        logging.warning(
-            f" '(venv)[{v_path}]' in user_config.txt is an invalid file path."
-        )
-
         if v_path.lower() == "none" or "" or " ":
             v_path = None
+        else:
+            logging.error(
+                f" '(venv)[{v_path}]' in user_config.txt is an invalid file path."
+            )
+            Alert(title="Error", message="Invalid file path in user_config.txt").alert()
 
     # Get working directory for user's main.py file
 

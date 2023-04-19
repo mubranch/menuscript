@@ -11,12 +11,12 @@ def main():
         open_url()
         disable()
 
-    app = MenuBarApp(
+    menu = MenuBarApp(
         name="MenuScript",
         icon=os.path.join(settings.image_path, "light.icns"),
         items=load_items(),
     )
-    app.run()
+    menu.run(debug=True)
 
 
 if __name__ == "__main__":

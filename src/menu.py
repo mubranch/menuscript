@@ -17,9 +17,9 @@ class MenuBarApp(rumps.App):
     def __init__(self, name: str, icon: str, items: list[ScriptItem]) -> None:
         super().__init__(name=name, icon=icon)
         self.items = items_to_dict(items)
-        self.refresh()
+        self.init_menu()
 
-    def refresh(self) -> None:
+    def init_menu(self) -> None:
         """
         Refreshes the menu bar with items from user_config.txt.
 

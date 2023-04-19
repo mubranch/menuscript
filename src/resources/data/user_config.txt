@@ -12,10 +12,8 @@
 #
 # Example correctly entered script, feel free to copy paste and insert your name and paths.
 #
-# (name)[Hello World] (script)[User/john/Scripts/Hello World/main.py] (venv)[User/john/Scripts/Hello World/.venv/bin/python]
+# (name)[Hello World] (script)[test_script/main.py] (venv)[None]
 #
 # -----------------------------------
 
-(name)[Denver Salary Graph] (script)[/Users/mustafa/Code/dsalary/main.py](venv) [/Users/mustafa/Code/dsalary/venv/bin/python]
-
-(name)[Hello World](script) [/Users/mustafa/Scripts/Hello World/main.py](venv) [/Users/mustafa/Scripts/Hello World/venv/bin/python]
+(name)[Test Script] (script)[./src/resources/data/test_script/main.py] (venv)[None]

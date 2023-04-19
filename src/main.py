@@ -16,7 +16,7 @@ def main():
         icon=os.path.join(settings.image_path, "light.icns"),
         items=load_items(),
     )
-    menu.run(debug=True)
+    menu.run()
 
 
 if __name__ == "__main__":

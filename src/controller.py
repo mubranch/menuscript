@@ -5,6 +5,9 @@ import subprocess
 import os
 import shutil
 import webbrowser
+import logging
+
+logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
 
 
 class ScriptItem:
@@ -83,20 +86,42 @@ def execute(item: dict[ScriptItem], _) -> any:
     s_path = item["s_path"]
     v_path = item["v_path"]
 
+    # Check if paths in user_config.txt are valid
+
+    if not os.path.exists(s_path):
+        logging.error(
+            f" '(script)[{s_path}]' in user_config.txt is an invalid file path."
+        )
+        return
+
+    if not os.path.exists(v_path):
+        logging.warning(
+            f" '(venv)[{v_path}]' in user_config.txt is an invalid file path."
+        )
+
+        if v_path.lower() == "none" or "" or " ":
+            v_path = None
+
+    # Get working directory for user's main.py file
+
+    s_name = s_path.split("/")[-1]
     path = "/".join(s_path.split("/")[:-1])
 
     if v_path:
         try:
-            subprocess.Popen([v_path, s_path], cwd=path)
+            subprocess.Popen([v_path, s_name], cwd=path)
+            logging.info(f"Running {s_name}...")
             return
         except Exception as e:
-            print(e)
+            logging.error(e)
             return e
 
     try:
-        subprocess.Popen(["python", s_path], cwd=path)
+        subprocess.Popen(["python3", s_name], cwd=path)
+        logging.info(f"Running {s_name}...")
         return
     except Exception as e:
+        logging.error(e)
         return e
 
 

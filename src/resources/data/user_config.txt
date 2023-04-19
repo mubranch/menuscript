@@ -1,0 +1,21 @@
+#
+#
+#
+#
+# Hi, this is your configuration file. This is a scalable way to add scripts to the menubar app.
+# To successfully execute scripts, MenuScript needs to know 3 things about your script: 
+# 1. The name
+# 2. The location
+# 3. The location of the executable which runs your script
+#
+# For an actual tutorial, head to the docs at https://www.someurl.com
+#
+# Example correctly entered script, feel free to copy paste and insert your name and paths.
+#
+# (name)[Hello World] (script)[User/john/Scripts/Hello World/main.py] (venv)[User/john/Scripts/Hello World/.venv/bin/python]
+#
+# -----------------------------------
+
+(name)[Denver Salary Graph] (script)[/Users/mustafa/Code/dsalary/main.py](venv) [/Users/mustafa/Code/dsalary/venv/bin/python]
+
+(name)[Hello World](script) [/Users/mustafa/Scripts/Hello World/main.py](venv) [/Users/mustafa/Scripts/Hello World/venv/bin/python]

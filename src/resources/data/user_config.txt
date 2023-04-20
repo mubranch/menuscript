@@ -16,4 +16,4 @@
 #
 # -----------------------------------
 
-(name)[Test Script] (script)[./data/test_script/main.py] (venv)[]
+(name)[Test Script] (script)[./resources/data/test_script/main.py] (venv)[]

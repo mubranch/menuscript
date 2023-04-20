@@ -2,7 +2,7 @@ from setuptools import setup
 import glob
 
 APP = ["src/main.py"]
-DATA_FILES = [("resources", glob.glob("resources/*.*"))]
+DATA_FILES = [("./src/resources")]
 OPTIONS = {
     "argv_emulation": True,
     "plist": {

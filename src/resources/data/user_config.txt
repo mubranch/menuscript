@@ -14,6 +14,7 @@
 #
 # (name)[Hello World] (script)[test_script/main.py] (venv)[None]
 #
+# READTHIS: Your paths should be an absolute path. Not relative. In other words, don't start your path with a '.'
 # -----------------------------------
 
-(name)[Test Script] (script)[./resources/data/test_script/main.py] (venv)[]
+(name)[Test Script] (script)[./src/resources/data/test_script/main.py] (venv)[]

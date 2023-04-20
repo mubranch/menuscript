@@ -5,7 +5,7 @@ def init():
     import os
 
     global data_path
-    data_path = os.path.dirname(__file__)
+    data_path = os.path.dirname(__file__) + "/resources/data"
     print(data_path)
     global image_path
     image_path = data_path.split("data")[0] + "imgs"

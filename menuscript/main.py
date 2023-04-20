@@ -1,6 +1,6 @@
-from menu import MenuBarApp
-from controller import load_items, open_url, disable
-import resources.data.settings as settings
+from menu.menu import MenuBarApp
+from controller.controller import load_items, open_url, disable
+import settings
 import os
 
 

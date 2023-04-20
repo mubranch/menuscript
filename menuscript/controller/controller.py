@@ -1,6 +1,6 @@
 # scripty/controllers/controllers.py
 
-import resources.data.settings as settings
+import settings
 import subprocess
 import os
 import shutil

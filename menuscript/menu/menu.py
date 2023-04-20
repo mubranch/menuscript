@@ -1,5 +1,11 @@
 import rumps
-from controller import ScriptItem, execute, items_to_dict, open_config, open_url
+from controller.controller import (
+    ScriptItem,
+    execute,
+    items_to_dict,
+    open_config,
+    open_url,
+)
 from functools import partial
 
 

@@ -25,6 +25,7 @@ class MenuBarApp(rumps.App):
 
         :params self: the MenuBarApp object.
         """
+
         for key, value in self.items.items():
             rumps.clicked(key)(partial(execute, value))
 
@@ -41,12 +42,26 @@ class MenuBarApp(rumps.App):
         ]
 
     def edit_scripts(self, _):
+        """
+        Opens the user_config.txt file in the default text editor.
+
+        :params self: the MenuBarApp object.
+        """
+
         rumps.notification(
             title="MenuScript",
             subtitle="Edit Scripts",
             message="Save and Reload the app for changes to take effect.",
         )
+
         open_config()
 
     def report_bug(self, _):
+        """
+
+        Opens the GitHub issues page in the default browser.
+
+        :params self: the MenuBarApp object.
+        """
+
         open_url()

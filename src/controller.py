@@ -6,7 +6,6 @@ import os
 import shutil
 import webbrowser
 import logging
-from alerts import Alert
 
 logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
 
@@ -84,26 +83,42 @@ def load_items() -> list[ScriptItem]:
 
 
 def execute(item: dict[ScriptItem], _) -> any:
+    """
+    Execute the script displayed in the menu bar. If a virtual environement is
+    configured in the user_config.txt file, it will run with the python executable
+    within the virtual environment. This has the benefit of not having to install
+    dependencies globally.
+
+    :param item: ScriptItem object
+    """
     s_path = item["s_path"]
     v_path = item["v_path"]
+
+    cwd = os.getcwd()
+
+    if s_path.startswith("."):
+        s_path = cwd + s_path[1:]
+
+    if v_path.startswith("."):
+        v_path = cwd + v_path[1:]
 
     # Check if paths in user_config.txt are valid
 
     if not os.path.exists(s_path):
+        logging.error(f" '{os.getcwd()}' is the current working directory")
         logging.error(
             f" '(script)[{s_path}]' in user_config.txt is an invalid file path."
         )
-        Alert(title="Error", message="Invalid file path in user_config.txt").alert()
         return
 
     if not os.path.exists(v_path):
         if v_path.lower() == "none" or "" or " ":
             v_path = None
         else:
+            logging.error(f" '{os.getcwd()}' is the current working directory")
             logging.error(
                 f" '(venv)[{v_path}]' in user_config.txt is an invalid file path."
             )
-            Alert(title="Error", message="Invalid file path in user_config.txt").alert()
 
     # Get working directory for user's main.py file
 
@@ -129,6 +144,10 @@ def execute(item: dict[ScriptItem], _) -> any:
 
 
 def open_url():
+    """
+    Open the Documentation for this project in the user's default browser.
+    """
+
     webbrowser.open("https://www.github.com/mubranch")
 
 

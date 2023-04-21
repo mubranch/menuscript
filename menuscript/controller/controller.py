@@ -6,7 +6,7 @@ import subprocess
 import os
 import shutil
 import webbrowser
-from pathlib import Path
+import pathlib
 
 # import logging
 # logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
@@ -53,7 +53,7 @@ def create_config():
         lines = f.readlines()
 
     # create hidden .menuscript folder if it doesn't exist
-    os.makedirs(settings.user_data_path)
+    pathlib.Path.mkdir(settings.user_data_path)
 
     # write new config into user home folder
     with open(f"{settings.user_data_path}/config.txt", "x") as f:
@@ -80,7 +80,7 @@ def open_config() -> None:
 def load_items() -> list[ScriptItem]:
     items = []
 
-    if not os.path.exists(f"{settings.user_data_path}/config.txt"):
+    if not pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
         print("Creating config.txt file in user home folder.")
         create_config()
 
@@ -124,39 +124,48 @@ def execute(item: dict[ScriptItem], _) -> any:
     :param item: ScriptItem object
     """
     s_path = item["s_path"]
+    s_path = pathlib.Path(s_path)
     v_path = item["v_path"]
+    v_path = pathlib.Path(v_path)
 
     # Check if paths in config.txt are valid
 
-    if not os.path.exists(s_path):
-        print(f" '{os.getcwd()}' is the current working directory")
-        print(f" '(script)[{s_path}]' in user config file is an invalid file path.")
+    if not s_path.exists():
+        print(f" '{pathlib.Path.cwd()}' is the current working directory")
+        print(
+            f" '(script)[{s_path.resolve()}]' in user config file is an invalid file path."
+        )
         return
 
-    if not os.path.exists(v_path):
-        if v_path.lower() == "none" or "" or " ":
+    if not v_path.exists():
+        if v_path.resolve().lower() == "none" or "" or " ":
             v_path = None
         else:
-            print(f" '{os.getcwd()}' is the current working directory")
-            print(f" '(venv)[{v_path}]' in user config file is an invalid file path.")
+            print(f" '{pathlib.Path.cwd()}' is the current working directory")
+            print(
+                f" '(venv)[{v_path.resolve()}]' in user config file is an invalid file path."
+            )
 
     # Get script name from s_path
-    s_name = s_path.split("/")[-1]
-    path = "/".join(s_path.split("/")[:-1])
+    s_name = s_path.resolve().split("/")[-1]
+    path = pathlib.Path("/".join(s_path.resolve().split("/")[:-1]))
 
-    if v_path:
-        venv_activate = v_path.split("bin")[0] + "bin/activate"
-        cmd = f"source {venv_activate}; {v_path} {s_name}"
+    if v_path:  # will be None or a PoxisPath object
+        venv_activate = v_path.resolve().split("bin")[0] + "bin/activate"
+        cmd = f"source {venv_activate}; {v_path} {s_name}"  # Set bash command for Popen
 
         try:
-            p = subprocess.Popen(cmd, cwd=path, stdout=subprocess.PIPE, shell=True)
+            p = subprocess.Popen(
+                cmd, cwd=path.resolve(), stdout=subprocess.PIPE, shell=True
+            )
             print(p.communicate()[0])
             return
         except Exception as e:
             return e
 
+    # If no virtual environment is configured, run script with global python interpreter
     try:
-        subprocess.run([Path(sys.executable).resolve(), s_name], cwd=path)
+        subprocess.run([pathlib.Path(sys.executable).resolve(), s_name], cwd=path)
         return
     except Exception as e:
         return e
@@ -188,5 +197,5 @@ def restart() -> None:
     print("Restarting MenuScript...")
 
     os.execl(
-        sys.executable, os.path.abspath(__file__), *sys.argv
+        sys.executable, pathlib.Path.absolute(__file__), *sys.argv
     )  # restarts the MenuScript

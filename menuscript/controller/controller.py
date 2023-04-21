@@ -1,6 +1,6 @@
 # scripty/controllers/controllers.py
 
-import settings
+from resources import settings
 import subprocess
 import os
 import shutil
@@ -37,23 +37,50 @@ def items_to_dict(items: list[ScriptItem]) -> dict:
 
 
 def create_config():
-    src = f"{settings.data_path}/config.txt"
-    dest = f"{settings.data_path}/user.txt"
+    """
+    Creates a config file in the user home folder if it doesn't exist.
+    Copies the default config file from the data folder into the user home folder.
+    Copies the get_started script into the user home folder.
+    Copies the settings.py file into the user home folder.
 
-    shutil.copy(src, dest)
+    """
+
+    # read default config file from data folder
+    with open(f"{settings.data_path}/config.txt", "r") as f:
+        lines = f.readlines()
+
+    # create hidden .menuscript folder if it doesn't exist
+    os.makedirs(settings.user_data_path)
+
+    # write new config into user home folder
+    with open(f"{settings.user_data_path}/config.txt", "x") as f:
+        for line in lines:
+            if line.startswith("(name)"):
+                print(
+                    f"Creating default script at {settings.data_path}/menuscript/resources/data/get_started/main.py"  # noqa: E501
+                )
+                line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"  # noqa: E501
+            f.write(line)
+
+    # copy get_started script into user home folder
+    src = f"{settings.data_path}/get_started"
+    dest = f"{settings.user_data_path}/get_started"
+
+    shutil.copytree(src, dest)
 
 
-def open_config():
-    subprocess.Popen(["open", f"{settings.data_path}/user.txt"])
+def open_config() -> None:
+    subprocess.Popen(["open", f"{settings.user_data_path}/config.txt"])
 
 
 def load_items() -> list[ScriptItem]:
     items = []
 
-    if not os.path.exists(f"{settings.data_path}/user.txt"):
+    if not os.path.exists(f"{settings.user_data_path}/config.txt"):
+        print("Creating config.txt file in user home folder.")
         create_config()
 
-    with open(f"{settings.data_path}/user.txt", "r") as f:
+    with open(f"{settings.user_data_path}/config.txt", "r") as f:
         lines = f.readlines()
 
     for line in lines:
@@ -87,7 +114,7 @@ def load_items() -> list[ScriptItem]:
 def execute(item: dict[ScriptItem], _) -> any:
     """
     Execute the script displayed in the menu bar. If a virtual environement is
-    configured in the user.txt file, it will run with the python executable
+    configured in the config.txt file, it will run with the python executable
     within the virtual environment. This has the benefit of not having to install
     dependencies globally.
 
@@ -96,15 +123,7 @@ def execute(item: dict[ScriptItem], _) -> any:
     s_path = item["s_path"]
     v_path = item["v_path"]
 
-    cwd = os.getcwd()
-
-    if s_path.startswith("."):
-        s_path = cwd + s_path[1:]
-
-    if v_path.startswith("."):
-        v_path = cwd + v_path[1:]
-
-    # Check if paths in user.txt are valid
+    # Check if paths in config.txt are valid
 
     if not os.path.exists(s_path):
         logging.error(f" '{os.getcwd()}' is the current working directory")
@@ -145,7 +164,7 @@ def execute(item: dict[ScriptItem], _) -> any:
         return e
 
 
-def open_url(url: str = "https://www.github.com/mubranch"):
+def open_url(url: str = "https://www.github.com/mubranch") -> None:
     """
     Open the Documentation for this project in the user's default browser.
     """
@@ -153,24 +172,12 @@ def open_url(url: str = "https://www.github.com/mubranch"):
     webbrowser.open(url)
 
 
-def disable() -> None:
-    with open(f"{settings.data_path}/settings.py", "r") as f:
-        lines = f.readlines()
-
-    with open(f"{settings.data_path}/settings.py", "w") as f:
-        for line in lines:
-            if line.startswith("    first_start ="):
-                f.write("    first_start = False")
-            else:
-                f.write(line)
-
-
 def reset() -> None:
     """
-    Reset the user.txt file to the default config.txt file.
+    Reset the config.txt file to the default config.txt file.
     """
 
     src = f"{settings.data_path}/config.txt"
-    dest = f"{settings.data_path}/user.txt"
+    dest = f"{settings.user_data_path}/config.txt"
 
     shutil.copy(src, dest)

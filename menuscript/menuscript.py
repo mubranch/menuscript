@@ -1,6 +1,6 @@
 from menu.menu import MenuBarApp
 import controller.controller as controller
-import settings
+import resources.settings as settings
 import os
 
 
@@ -8,10 +8,6 @@ def main():
     settings.init()
 
     items = controller.load_items()
-
-    if settings.first_start:
-        controller.open_url()
-        controller.disable()
 
     menu = MenuBarApp(
         name="MenuScript",

@@ -1,0 +1,1 @@
+pyinstaller --onefile --add-data './menuscript/resources:resources' ./menuscript/menuscript.py

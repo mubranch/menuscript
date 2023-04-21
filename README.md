@@ -31,7 +31,7 @@ MenuScript is a Python project that uses rumps, a library for creating macOS sta
 
 To install and use MenuScript on macOS, follow these steps:
 
-1. Go to the releases folder of the MenuScript project and download the latest release.
+1. Go to the releases page of the MenuScript project and download the latest release.
 2. Move the downloaded release to your Applications folder.
 3. Run MenuScript as you would any other macOS application.
 
@@ -61,7 +61,7 @@ Periodic updates are made to MenuScript to add new features and improve user-fri
 
 To install MenuScript on macOS, follow these steps:
 
-1. Download the latest release from the releases folder of the MenuScript project.
+1. Download the latest release from the releases page of the MenuScript project.
 2. Move the downloaded application to your Applications folder.
 3. Run the application. If you want MenuScript to automatically run on startup, you can add it to your login items in System Preferences -> Users & Groups -> Login Items.
 

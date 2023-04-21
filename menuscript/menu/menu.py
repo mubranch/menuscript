@@ -66,12 +66,6 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        rumps.notification(
-            title="MenuScript",
-            subtitle="Edit Scripts",
-            message="Save and Reload the app for changes to take effect.",
-        )
-
         controller.open_config()
 
     def report_bug(self, _):

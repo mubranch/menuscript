@@ -1,6 +1,6 @@
 #
 #
-# Hi, before editing this file I reccommend you read the documentation at: https://github.com/mubranch/menuscript 
+# Hi, before editing this file I recommend you read the documentation at: https://github.com/mubranch/menuscript 
 #
 # :format: (name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Optional Absolute/path/to/venv/bin/pythonexecutable)
 #

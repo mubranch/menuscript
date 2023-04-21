@@ -29,43 +29,45 @@
 
 ## About <a name = "about"></a>
 
-MenuScript uses rumps, and python to run any python script from the menubar. If your script needs a virtual environment, you can specify the path to the virtual environment in the config file and then
-run the script as if it were in the virtual environment.
-
-This project is really just a passion project that makes it easier for me to run my common scripts without opening the terminal. I hope you find it useful as well.
+MenuScript is a Python project that uses rumps, a library for creating macOS status bar apps, to run any Python script from the menubar. It provides a convenient way to execute commonly used scripts without needing to open the terminal. If your script requires a virtual environment, you can specify the path to the virtual environment in the config file and then run the script as if it were within the virtual environment. While this project is a personal passion project, it aims to provide a useful tool for streamlining script execution in macOS.
 
 ## Getting Started <a name = "getting_started"></a>
 
-Head to the releases folder and download the latest release. Put it in your Applications folder and run it just like you would any other MacOS application. 
+To install and use MenuScript on macOS, follow these steps:
 
-If Scripts are failing to run, make sure you given menuscript the correct permissions. You can do this by going to System Preferences -> Security & Privacy -> Privacy -> Accessibility and adding menuscript to the list of applications that can control your computer.
+1. Go to the releases folder of the MenuScript project and download the latest release.
+2. Move the downloaded release to your Applications folder.
+3. Run MenuScript as you would any other macOS application.
 
-To edit scripts, open the application and click the 'Edit Scripts' button. This will open the config file in your default text editor. You can add scripts by adding a new line with the following format:
+If you encounter issues with scripts failing to run, ensure that MenuScript has the necessary permissions. You can grant these permissions by going to System Preferences -> Security & Privacy -> Privacy -> Accessibility, and adding MenuScript to the list of applications allowed to control your computer.
+
+To edit scripts in MenuScript, open the application and click the 'Edit Scripts' button. This will open the config file in your default text editor. You can add new scripts by adding a new line in the following format:
+
 ```
 (name)[Anything] (script)[Absolute path to script] (venv)[Absolute path to virtual environment python executable]
 ```
-hitting save and restarting the application.
+Save the config file and restart MenuScript.
 
-The venv is optional. If you don't want to use a virtual environment, just leave it blank like so:
+The virtual environment (venv) parameter is optional. If you don't want to use a virtual environment, leave it blank as follows:
 
 ```
 (name)[Anything] (script)[User/name/path/to/scripty.py] (venv)[]
 ```
 
-Updates are made periodically to add more features and make MenuScript more user friendly.
+Periodic updates are made to MenuScript to add new features and improve user-friendliness.
 
 ### Prerequisites
 
-Must have python3 installed.
-Must be on MacOS.
+1. Python 3 must be installed on your macOS system.
+2. The application is designed to work specifically on macOS.
 
 ### Installing
 
-Step 1: Download the latest release from the releases folder.
+To install MenuScript on macOS, follow these steps:
 
-Step 2: Put the application in your Applications folder.
-
-Step 3: Run the application. If you want menuscript to run on startup, you can add it to your login items in System Preferences -> Users & Groups -> Login Items.
+1. Download the latest release from the releases folder of the MenuScript project.
+2. Move the downloaded application to your Applications folder.
+3. Run the application. If you want MenuScript to automatically run on startup, you can add it to your login items in System Preferences -> Users & Groups -> Login Items.
 
 ## Built Using <a name = "built_using"></a>
 

@@ -22,6 +22,7 @@ class MenuBarApp(rumps.App):
 
     def __init__(self, name: str, icon: str, items: list[ScriptItem]) -> None:
         super().__init__(name=name, icon=icon)
+
         self.items = items_to_dict(items)
         self.init_menu()
 
@@ -32,17 +33,32 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        for key, value in self.items.items():
-            rumps.clicked(key)(partial(execute, value))
+        if self.items is not None:
+            for key, value in self.items.items():
+                rumps.clicked(key)(partial(execute, value))
+
+            self.menu = [
+                *self.items,
+                None,
+                rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
+                rumps.MenuItem("Documentation", callback=self.read_docs),
+                [
+                    rumps.MenuItem("More"),
+                    [
+                        rumps.MenuItem("Reset", callback=self.reset_app),
+                    ],
+                ],
+            ]
+            return
 
         self.menu = [
-            *self.items,
             None,
+            rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
+            rumps.MenuItem("Documentation", callback=self.read_docs),
             [
                 rumps.MenuItem("More"),
                 [
-                    rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
-                    rumps.MenuItem("Report a Bug", callback=self.report_bug),
+                    rumps.MenuItem("Reset", callback=self.reset_app),
                 ],
             ],
         ]
@@ -70,4 +86,25 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        open_url()
+        open_url("https://www.github.com/mubranch/menuscript")
+
+    def read_docs(self, _):
+        """
+
+        Opens the GitHub issues page in the default browser.
+
+        :params self: the MenuBarApp object.
+        """
+
+        open_url("https://www.github.com/mubranch/menuscript")
+
+    def reset_app(self, _):
+        """
+
+        Resets the MenuScript app.
+
+        :params self: the MenuBarApp object.
+
+        """
+
+        ...

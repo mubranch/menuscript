@@ -125,8 +125,10 @@ def execute(item: dict[ScriptItem], _) -> any:
 
     # Check if paths in config.txt are valid
 
-    if not s_path.exists():
-        return
+    if not s_path.is_file() or not str(s_path).endswith(".py"):
+        raise ValueError(
+            "...(script)[path/to/script]... in user config file is not a '.py' file"
+        )
 
     if not v_path.is_file():
         if str(v_path).lower() == "none" or "." or " ":

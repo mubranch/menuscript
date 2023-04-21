@@ -133,31 +133,29 @@ def execute(item: dict[ScriptItem], _) -> any:
     if not s_path.exists():
         print(f" '{pathlib.Path.cwd()}' is the current working directory")
         print(
-            f" '(script)[{s_path.resolve()}]' in user config file is an invalid file path."
+            f" '(script)[{str(s_path)}]' in user config file is an invalid file path."
         )
         return
 
     if not v_path.exists():
-        if v_path.resolve().lower() == "none" or "" or " ":
+        if str(v_path).lower() == "none" or "" or " ":
             v_path = None
         else:
             print(f" '{pathlib.Path.cwd()}' is the current working directory")
             print(
-                f" '(venv)[{v_path.resolve()}]' in user config file is an invalid file path."
+                f" '(venv)[{str(v_path)}]' in user config file is an invalid file path."
             )
 
     # Get script name from s_path
-    s_name = s_path.resolve().split("/")[-1]
-    path = pathlib.Path("/".join(s_path.resolve().split("/")[:-1]))
+    s_name = str(s_path).split("/")[-1]
+    path = pathlib.Path("/".join(str(s_path).split("/")[:-1]))
 
     if v_path:  # will be None or a PoxisPath object
-        venv_activate = v_path.resolve().split("bin")[0] + "bin/activate"
+        venv_activate = str(v_path).split("bin")[0] + "bin/activate"
         cmd = f"source {venv_activate}; {v_path} {s_name}"  # Set bash command for Popen
 
         try:
-            p = subprocess.Popen(
-                cmd, cwd=path.resolve(), stdout=subprocess.PIPE, shell=True
-            )
+            p = subprocess.Popen(cmd, cwd=str(path), stdout=subprocess.PIPE, shell=True)
             print(p.communicate()[0])
             return
         except Exception as e:
@@ -165,7 +163,7 @@ def execute(item: dict[ScriptItem], _) -> any:
 
     # If no virtual environment is configured, run script with global python interpreter
     try:
-        subprocess.run([pathlib.Path(sys.executable).resolve(), s_name], cwd=path)
+        subprocess.run([str(pathlib.Path(sys.executable)), s_name], cwd=path)
         return
     except Exception as e:
         return e

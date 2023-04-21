@@ -161,3 +161,4 @@ cython_debug/
 #.idea/
 menuscript/resources/data/user_config.txt
 .vscode/settings.json
+edit_scripts_contents.txt

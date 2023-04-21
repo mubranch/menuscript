@@ -177,7 +177,4 @@ def reset() -> None:
     Reset the config.txt file to the default config.txt file.
     """
 
-    src = f"{settings.data_path}/config.txt"
-    dest = f"{settings.user_data_path}/config.txt"
-
-    shutil.copy(src, dest)
+    os.removedirs(f"{settings.user_data_path}")

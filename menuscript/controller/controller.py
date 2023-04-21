@@ -163,3 +163,14 @@ def disable() -> None:
                 f.write("    first_start = False")
             else:
                 f.write(line)
+
+
+def reset() -> None:
+    """
+    Reset the user.txt file to the default config.txt file.
+    """
+
+    src = f"{settings.data_path}/config.txt"
+    dest = f"{settings.data_path}/user.txt"
+
+    shutil.copy(src, dest)

@@ -22,7 +22,7 @@ class Test(tk.Frame):
 
         tk.Label(
             self,
-            text="On the MenuBar, click 'More' > 'Edit Scripts' to add your first script.",
+            text="On the MenuBar, click 'Edit Scripts' to add your first script.",
             font=("system", 12),
             bg="white",
             wraplength=250,

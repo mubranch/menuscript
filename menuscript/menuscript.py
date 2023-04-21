@@ -1,5 +1,5 @@
 from menu.menu import MenuBarApp
-from controller.controller import load_items, open_url, disable
+import controller.controller as controller
 import settings
 import os
 
@@ -7,11 +7,11 @@ import os
 def main():
     settings.init()
 
-    items = load_items()
+    items = controller.load_items()
 
     if settings.first_start:
-        open_url()
-        disable()
+        controller.open_url()
+        controller.disable()
 
     menu = MenuBarApp(
         name="MenuScript",

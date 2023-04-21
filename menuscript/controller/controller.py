@@ -59,9 +59,6 @@ def create_config():
     with open(f"{settings.user_data_path}/config.txt", "x") as f:
         for line in lines:
             if line.startswith("(name)"):
-                print(
-                    f"Creating default script at {settings.data_path}/menuscript/resources/data/get_started/main.py"  # noqa: E501
-                )
                 line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"  # noqa: E501
             f.write(line)
 
@@ -73,7 +70,6 @@ def create_config():
 
 
 def open_config() -> None:
-    print(f"Opening config.txt file in {settings.user_data_path} folder.")
     subprocess.Popen(["open", f"{settings.user_data_path}/config.txt"])
 
 
@@ -81,7 +77,6 @@ def load_items() -> list[ScriptItem]:
     items = []
 
     if not pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
-        print("Creating config.txt file in user home folder.")
         create_config()
 
     with open(f"{settings.user_data_path}/config.txt", "r") as f:
@@ -131,20 +126,11 @@ def execute(item: dict[ScriptItem], _) -> any:
     # Check if paths in config.txt are valid
 
     if not s_path.exists():
-        print(f" '{pathlib.Path.cwd()}' is the current working directory")
-        print(
-            f" '(script)[{str(s_path)}]' in user config file is an invalid file path."
-        )
         return
 
     if not v_path.is_file():
         if str(v_path).lower() == "none" or "." or " ":
             v_path = None
-        else:
-            print(f" '{pathlib.Path.cwd()}' is the current working directory")
-            print(
-                f" '(venv)[{str(v_path)}]' in user config file is an invalid file path."
-            )
 
     # Get script name from s_path
     s_name = str(s_path).split("/")[-1]
@@ -173,7 +159,7 @@ def open_url(url: str = "https://www.github.com/mubranch") -> None:
     """
     Open the Documentation for this project in the user's default browser.
     """
-    print(f"Opening {url} in default browser.")
+
     webbrowser.open(url)
 
 
@@ -181,8 +167,7 @@ def reset() -> None:
     """
     Remove script and config files from user home folder.
     """
-    print("Removing script and config files from user home folder.")
-    print("Restarting MenuScript...")
+
     shutil.rmtree(settings.user_data_path)
     restart()
 
@@ -191,8 +176,6 @@ def restart() -> None:
     """
     Restart MenuScript.
     """
-
-    print("Restarting MenuScript...")
 
     os.execl(
         sys.executable, os.path.abspath(__file__), *sys.argv

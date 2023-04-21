@@ -32,39 +32,43 @@
 
 ## 🧐 About <a name = "about"></a>
 
-MenuScript is uses rumps, tkinter, and subprocess to run any script from the menubar. If your script needs a virtual environment, you can specify the path to the virtual environment in the config file and then
+MenuScript uses rumps, and python to run any python script from the menubar. If your script needs a virtual environment, you can specify the path to the virtual environment in the config file and then
 run the script as if it were in the virtual environment.
 
 This project is really just a passion project that makes it easier for me to run my common scripts without opening the terminal. I hope you find it useful as well.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine. Simply head to the releases page and download the latest release. Put it in your Applications folder and run it just like you would any other MacOS application. 
+Head to the releases folder and download the latest release. Put it in your Applications folder and run it just like you would any other MacOS application. 
 
 If Scripts are failing to run, make sure you given menuscript the correct permissions. You can do this by going to System Preferences -> Security & Privacy -> Privacy -> Accessibility and adding menuscript to the list of applications that can control your computer.
 
-The code is pretty simple and you can easily modify it to fit your needs. If you have any questions, feel free to reach out to me.
+To edit scripts, open the application and click the 'Edit Scripts' button. This will open the config file in your default text editor. You can add scripts by adding a new line with the following format:
+```
+(name)[Anything] (script)[Absolute path to script] (venv)[Absolute path to virtual environment python executable]
+```
+hitting save and restarting the application.
+
+The venv is optional. If you don't want to use a virtual environment, just leave it blank like so:
+
+```
+(name)[Anything] (script)[User/name/path/to/scripty.py] (venv)[]
+```
+
+Updates are made periodically to add more features and make MenuScript more user friendly.
 
 ### Prerequisites
 
 Must have python3 installed.
+Must be on MacOS.
 
 ### Installing
 
-```
 Step 1: Download the latest release from the releases folder.
-```
 
-```
 Step 2: Put the application in your Applications folder.
 
-```
-
-```
-
 Step 3: Run the application. If you want menuscript to run on startup, you can add it to your login items in System Preferences -> Users & Groups -> Login Items.
-
-```
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 

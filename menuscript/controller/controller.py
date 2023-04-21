@@ -1,13 +1,15 @@
 # scripty/controllers/controllers.py
 
 from resources import settings
+import sys
 import subprocess
 import os
 import shutil
 import webbrowser
-import logging
 
-logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
+# import logging
+# logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
+# Implement correct logging later
 
 
 class ScriptItem:
@@ -70,6 +72,7 @@ def create_config():
 
 
 def open_config() -> None:
+    print(f"Opening config.txt file in {settings.user_data_path} folder.")
     subprocess.Popen(["open", f"{settings.user_data_path}/config.txt"])
 
 
@@ -126,41 +129,41 @@ def execute(item: dict[ScriptItem], _) -> any:
     # Check if paths in config.txt are valid
 
     if not os.path.exists(s_path):
-        logging.error(f" '{os.getcwd()}' is the current working directory")
-        logging.error(
-            f" '(script)[{s_path}]' in user config file is an invalid file path."
-        )
+        print(f" '{os.getcwd()}' is the current working directory")
+        print(f" '(script)[{s_path}]' in user config file is an invalid file path.")
         return
 
     if not os.path.exists(v_path):
         if v_path.lower() == "none" or "" or " ":
             v_path = None
         else:
-            logging.error(f" '{os.getcwd()}' is the current working directory")
-            logging.error(
-                f" '(venv)[{v_path}]' in user config file is an invalid file path."
-            )
+            print(f" '{os.getcwd()}' is the current working directory")
+            print(f" '(venv)[{v_path}]' in user config file is an invalid file path.")
 
     # Get working directory for user's main.py file
 
     s_name = s_path.split("/")[-1]
     path = "/".join(s_path.split("/")[:-1])
+    print(f"Script path: {s_path}")
+    print(f"Virtual environment path: {v_path}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Path: {path}")
 
     if v_path:
         try:
-            subprocess.Popen([v_path, s_name], cwd=path)
-            logging.info(f"Running {s_name}...")
+            print(f"Running {s_name}...")
+            subprocess.run([v_path, s_name], cwd=path)
             return
         except Exception as e:
-            logging.error(e)
+            print(e)
             return e
 
     try:
-        subprocess.Popen(["python3", s_name], cwd=path)
-        logging.info(f"Running {s_name}...")
+        print(f"Running {s_name}...")
+        subprocess.run(["python", s_name], cwd=path)
         return
     except Exception as e:
-        logging.error(e)
+        print(e)
         return e
 
 
@@ -168,7 +171,7 @@ def open_url(url: str = "https://www.github.com/mubranch") -> None:
     """
     Open the Documentation for this project in the user's default browser.
     """
-
+    print(f"Opening {url} in default browser.")
     webbrowser.open(url)
 
 
@@ -176,5 +179,19 @@ def reset() -> None:
     """
     Remove script and config files from user home folder.
     """
+    print("Removing script and config files from user home folder.")
+    print("Restarting MenuScript...")
+    shutil.rmtree(settings.user_data_path)
+    restart()
 
-    shutil.rmtree(f"{settings.user_data_path}")
+
+def restart() -> None:
+    """
+    Restart MenuScript.
+    """
+
+    print("Restarting MenuScript...")
+
+    os.execl(
+        sys.executable, os.path.abspath(__file__), *sys.argv
+    )  # restarts the MenuScript

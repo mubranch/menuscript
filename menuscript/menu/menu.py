@@ -37,10 +37,11 @@ class MenuBarApp(rumps.App):
                 *self.items,
                 None,
                 rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
-                rumps.MenuItem("Documentation", callback=self.read_docs),
                 [
                     rumps.MenuItem("More..."),
                     [
+                        rumps.MenuItem("Documentation", callback=self.read_docs),
+                        rumps.MenuItem("Restart", callback=self.restart_app),
                         rumps.MenuItem("Reset", callback=self.reset_app),
                     ],
                 ],
@@ -50,10 +51,11 @@ class MenuBarApp(rumps.App):
         self.menu = [
             None,
             rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
-            rumps.MenuItem("Documentation", callback=self.read_docs),
             [
                 rumps.MenuItem("More..."),
                 [
+                    rumps.MenuItem("Documentation", callback=self.read_docs),
+                    rumps.MenuItem("Restart", callback=self.restart_app),
                     rumps.MenuItem("Reset", callback=self.reset_app),
                 ],
             ],
@@ -70,7 +72,6 @@ class MenuBarApp(rumps.App):
 
     def report_bug(self, _):
         """
-
         Opens the GitHub issues page in the default browser.
 
         :params self: the MenuBarApp object.
@@ -80,7 +81,6 @@ class MenuBarApp(rumps.App):
 
     def read_docs(self, _):
         """
-
         Opens the GitHub issues page in the default browser.
 
         :params self: the MenuBarApp object.
@@ -90,11 +90,18 @@ class MenuBarApp(rumps.App):
 
     def reset_app(self, _):
         """
-
         Resets the MenuScript app.
 
         :params self: the MenuBarApp object.
-
         """
 
         controller.reset()
+
+    def restart_app(self, _):
+        """
+        Restarts the MenuScript app.
+
+        :params self: the MenuBarApp object.
+        """
+
+        controller.restart()

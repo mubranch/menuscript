@@ -69,7 +69,7 @@ To install MenuScript on macOS, follow these steps:
 Upcoming Release: Version X.Y.Z
 
 1. GUI for script editing
-2. Compatibility with popular venv managers (virtualenv, pipenv, conda, poetry)
+2. Compatibility with other dependency managers
 3. Update checker for easy software updates
 
 ## Built Using <a name = "built_using"></a>

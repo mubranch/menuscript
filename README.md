@@ -65,6 +65,13 @@ To install MenuScript on macOS, follow these steps:
 2. Move the downloaded application to your Applications folder.
 3. Run the application. If you want MenuScript to automatically run on startup, you can add it to your login items in System Preferences -> Users & Groups -> Login Items.
 
+### Planned Features
+Upcoming Release: Version X.Y.Z
+
+1. GUI for script editing
+2. Compatibility with popular venv managers (virtualenv, pipenv, conda, poetry)
+3. Update checker for easy software updates
+
 ## Built Using <a name = "built_using"></a>
 
 - [Rumps](https://rumps.readthedocs.io/en/latest/) - rumps

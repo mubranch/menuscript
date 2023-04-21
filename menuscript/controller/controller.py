@@ -160,7 +160,7 @@ def execute(item: dict[ScriptItem], _) -> any:
 
     try:
         print(f"Running {s_name}...")
-        subprocess.run(["python", s_name], cwd=path)
+        subprocess.run(["python3", s_name], cwd=path)
         return
     except Exception as e:
         print(e)

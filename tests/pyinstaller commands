@@ -1,4 +1,4 @@
-pyinstaller --onefile --add-data './menuscript/resources:resources' ./menuscript/menuscript.py
+pyinstaller --onefile --add-data './menuscript/resources:resources' ./menuscript/menuscript.py -n MenuScript --windowed --noconfirm --clean
 
 (name)[Get Started](script)[/Users/mustafa/.menuscript/get_started/main.py](venv)[]
 (name)[Denver Salaries](script)[/Users/mustafa/Code/dsalary/main.py](venv)[/Users/mustafa/Code/dsalary/venv/bin/python]

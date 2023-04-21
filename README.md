@@ -83,8 +83,3 @@ Upcoming Release: Version X.Y.Z
 
 See also the list of [contributors](https://github.com/mubranch/menuscript/contributors) who participated in this project.
 
-## Acknowledgements <a name = "acknowledgement"></a>
-
-- Hat tip to anyone whose code was used
-- Inspiration
-- References

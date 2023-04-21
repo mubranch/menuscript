@@ -18,26 +18,23 @@
     <br> 
 </p>
 
-## 📝 Table of Contents
+## Table of Contents
 
 - [About](#about)
 - [Getting Started](#getting_started)
-- [Deployment](#deployment)
-- [Usage](#usage)
 - [Built Using](#built_using)
-- [TODO](../TODO.md)
 - [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
 - [Acknowledgments](#acknowledgement)
 
-## 🧐 About <a name = "about"></a>
+## About <a name = "about"></a>
 
 MenuScript uses rumps, and python to run any python script from the menubar. If your script needs a virtual environment, you can specify the path to the virtual environment in the config file and then
 run the script as if it were in the virtual environment.
 
 This project is really just a passion project that makes it easier for me to run my common scripts without opening the terminal. I hope you find it useful as well.
 
-## 🏁 Getting Started <a name = "getting_started"></a>
+## Getting Started <a name = "getting_started"></a>
 
 Head to the releases folder and download the latest release. Put it in your Applications folder and run it just like you would any other MacOS application. 
 
@@ -70,18 +67,18 @@ Step 2: Put the application in your Applications folder.
 
 Step 3: Run the application. If you want menuscript to run on startup, you can add it to your login items in System Preferences -> Users & Groups -> Login Items.
 
-## ⛏️ Built Using <a name = "built_using"></a>
+## Built Using <a name = "built_using"></a>
 
 - [Rumps](https://rumps.readthedocs.io/en/latest/) - rumps
 - [PyInstaller](https://pyinstaller.org/en/stable/) - PyInstaller
 
-## ✍️ Authors <a name = "authors"></a>
+## Authors <a name = "authors"></a>
 
 - [@mubranch](https://github.com/mubranch) - Idea & Initial work
 
 See also the list of [contributors](https://github.com/mubranch/menuscript/contributors) who participated in this project.
 
-## 🎉 Acknowledgements <a name = "acknowledgement"></a>
+## Acknowledgements <a name = "acknowledgement"></a>
 
 - Hat tip to anyone whose code was used
 - Inspiration

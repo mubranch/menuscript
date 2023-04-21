@@ -14,7 +14,7 @@
 
 ---
 
-<p align="center"> Execute your must have python scripts from the menubar.
+<p align="center"> Run essential Python scripts from the macOS menubar with MenuScript.
     <br> 
 </p>
 

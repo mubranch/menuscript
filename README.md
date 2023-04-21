@@ -22,10 +22,6 @@
 
 - [About](#about)
 - [Getting Started](#getting_started)
-- [Built Using](#built_using)
-- [Contributing](../CONTRIBUTING.md)
-- [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
 
 ## About <a name = "about"></a>
 

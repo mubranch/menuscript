@@ -1,11 +1,5 @@
 import rumps
-from controller.controller import (
-    ScriptItem,
-    execute,
-    items_to_dict,
-    open_config,
-    open_url,
-)
+import controller.controller as controller
 from functools import partial
 
 
@@ -18,12 +12,14 @@ class MenuBarApp(rumps.App):
     :param items: list of ScriptItem objects loaded from user_config.txt.
     """
 
-    items = list[ScriptItem]
+    items = list[controller.ScriptItem]
 
-    def __init__(self, name: str, icon: str, items: list[ScriptItem]) -> None:
+    def __init__(
+        self, name: str, icon: str, items: list[controller.ScriptItem]
+    ) -> None:
         super().__init__(name=name, icon=icon)
 
-        self.items = items_to_dict(items)
+        self.items = controller.items_to_dict(items)
         self.init_menu()
 
     def init_menu(self) -> None:
@@ -35,7 +31,7 @@ class MenuBarApp(rumps.App):
 
         if self.items is not None:
             for key, value in self.items.items():
-                rumps.clicked(key)(partial(execute, value))
+                rumps.clicked(key)(partial(controller.execute, value))
 
             self.menu = [
                 *self.items,
@@ -43,7 +39,7 @@ class MenuBarApp(rumps.App):
                 rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
                 rumps.MenuItem("Documentation", callback=self.read_docs),
                 [
-                    rumps.MenuItem("More"),
+                    rumps.MenuItem("More..."),
                     [
                         rumps.MenuItem("Reset", callback=self.reset_app),
                     ],
@@ -56,7 +52,7 @@ class MenuBarApp(rumps.App):
             rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
             rumps.MenuItem("Documentation", callback=self.read_docs),
             [
-                rumps.MenuItem("More"),
+                rumps.MenuItem("More..."),
                 [
                     rumps.MenuItem("Reset", callback=self.reset_app),
                 ],
@@ -76,7 +72,7 @@ class MenuBarApp(rumps.App):
             message="Save and Reload the app for changes to take effect.",
         )
 
-        open_config()
+        controller.open_config()
 
     def report_bug(self, _):
         """
@@ -86,7 +82,7 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        open_url("https://www.github.com/mubranch/menuscript")
+        controller.open_url("https://www.github.com/mubranch/menuscript")
 
     def read_docs(self, _):
         """
@@ -96,7 +92,7 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        open_url("https://www.github.com/mubranch/menuscript")
+        controller.open_url("https://www.github.com/mubranch/menuscript")
 
     def reset_app(self, _):
         """
@@ -107,4 +103,4 @@ class MenuBarApp(rumps.App):
 
         """
 
-        ...
+        controller.reset()

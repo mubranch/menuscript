@@ -7,6 +7,8 @@ import os
 def main():
     settings.init()
 
+    items = load_items()
+
     if settings.first_start:
         open_url()
         disable()
@@ -14,7 +16,7 @@ def main():
     menu = MenuBarApp(
         name="MenuScript",
         icon=os.path.join(settings.image_path, "light.icns"),
-        items=load_items(),
+        items=items,
     )
 
     menu.run()

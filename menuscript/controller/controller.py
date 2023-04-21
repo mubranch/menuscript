@@ -27,6 +27,9 @@ class ScriptItem:
 
 
 def items_to_dict(items: list[ScriptItem]) -> dict:
+    if items is None:
+        return None
+
     d_items = {}
     for item in items:
         d_items[item.name] = item.to_dict()
@@ -35,23 +38,22 @@ def items_to_dict(items: list[ScriptItem]) -> dict:
 
 def create_config():
     src = f"{settings.data_path}/config.txt"
-    dest = f"{settings.data_path}/user_config.txt"
+    dest = f"{settings.data_path}/user.txt"
 
     shutil.copy(src, dest)
 
 
 def open_config():
-    subprocess.Popen(["open", f"{settings.data_path}/user_config.txt"])
+    subprocess.Popen(["open", f"{settings.data_path}/user.txt"])
 
 
 def load_items() -> list[ScriptItem]:
     items = []
 
-    if not os.path.exists(f"{settings.data_path}/user_config.txt"):
+    if not os.path.exists(f"{settings.data_path}/user.txt"):
         create_config()
-        return None
 
-    with open(f"{settings.data_path}/user_config.txt", "r") as f:
+    with open(f"{settings.data_path}/user.txt", "r") as f:
         lines = f.readlines()
 
     for line in lines:
@@ -85,7 +87,7 @@ def load_items() -> list[ScriptItem]:
 def execute(item: dict[ScriptItem], _) -> any:
     """
     Execute the script displayed in the menu bar. If a virtual environement is
-    configured in the user_config.txt file, it will run with the python executable
+    configured in the user.txt file, it will run with the python executable
     within the virtual environment. This has the benefit of not having to install
     dependencies globally.
 
@@ -102,12 +104,12 @@ def execute(item: dict[ScriptItem], _) -> any:
     if v_path.startswith("."):
         v_path = cwd + v_path[1:]
 
-    # Check if paths in user_config.txt are valid
+    # Check if paths in user.txt are valid
 
     if not os.path.exists(s_path):
         logging.error(f" '{os.getcwd()}' is the current working directory")
         logging.error(
-            f" '(script)[{s_path}]' in user_config.txt is an invalid file path."
+            f" '(script)[{s_path}]' in user config file is an invalid file path."
         )
         return
 
@@ -117,7 +119,7 @@ def execute(item: dict[ScriptItem], _) -> any:
         else:
             logging.error(f" '{os.getcwd()}' is the current working directory")
             logging.error(
-                f" '(venv)[{v_path}]' in user_config.txt is an invalid file path."
+                f" '(venv)[{v_path}]' in user config file is an invalid file path."
             )
 
     # Get working directory for user's main.py file
@@ -143,12 +145,12 @@ def execute(item: dict[ScriptItem], _) -> any:
         return e
 
 
-def open_url():
+def open_url(url: str = "https://www.github.com/mubranch"):
     """
     Open the Documentation for this project in the user's default browser.
     """
 
-    webbrowser.open("https://www.github.com/mubranch")
+    webbrowser.open(url)
 
 
 def disable() -> None:

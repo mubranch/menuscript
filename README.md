@@ -40,14 +40,14 @@ If you encounter issues with scripts failing to run, ensure that MenuScript has 
 To edit scripts in MenuScript, open the application and click the 'Edit Scripts' button. This will open the config file in your default text editor. You can add new scripts by adding a new line in the following format:
 
 ```
-(name)[Anything](script)[Absolute path to script](venv)[Absolute path to virtual environment python executable]
+(name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Optional Absolute/path/to/venv/bin/pythonexecutable)
 ```
 Save the config file and restart MenuScript.
 
 The virtual environment (venv) parameter is optional. If you don't want to use a virtual environment, leave it blank as follows:
 
 ```
-(name)[Anything](script)[User/name/path/to/scripty.py](venv)[]
+(name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)[]
 ```
 
 Periodic updates are made to MenuScript to add new features and improve user-friendliness.

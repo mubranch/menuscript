@@ -14,7 +14,7 @@ APP = ["menuscript/menuscript.py"]
 APP_NAME = "MenuScript"
 DATA_FILES = [("menuscript/resources")]
 OPTIONS = {
-    "argv_emulation": True,
+    "argv_emulation": False,
     "iconfile": "menuscript/resources/imgs/icon.icns",
     "plist": {
         "LSUIElement": True,

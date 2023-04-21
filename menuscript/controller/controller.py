@@ -6,6 +6,7 @@ import subprocess
 import os
 import shutil
 import webbrowser
+from pathlib import Path
 
 # import logging
 # logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s")
@@ -117,9 +118,8 @@ def load_items() -> list[ScriptItem]:
 def execute(item: dict[ScriptItem], _) -> any:
     """
     Execute the script displayed in the menu bar. If a virtual environement is
-    configured in the config.txt file, it will run with the python executable
-    within the virtual environment. This has the benefit of not having to install
-    dependencies globally.
+    configured in the config.txt file, it will activate the virtual environemnt.
+    Then run the script.
 
     :param item: ScriptItem object
     """
@@ -140,30 +140,25 @@ def execute(item: dict[ScriptItem], _) -> any:
             print(f" '{os.getcwd()}' is the current working directory")
             print(f" '(venv)[{v_path}]' in user config file is an invalid file path.")
 
-    # Get working directory for user's main.py file
-
+    # Get script name from s_path
     s_name = s_path.split("/")[-1]
     path = "/".join(s_path.split("/")[:-1])
-    print(f"Script path: {s_path}")
-    print(f"Virtual environment path: {v_path}")
-    print(f"Current working directory: {os.getcwd()}")
-    print(f"Path: {path}")
 
     if v_path:
+        venv_activate = v_path.split("bin")[0] + "bin/activate"
+        cmd = f"source {venv_activate}; {v_path} {s_name}"
+
         try:
-            print(f"Running {s_name}...")
-            subprocess.run([v_path, s_name], cwd=path)
+            p = subprocess.Popen(cmd, cwd=path, stdout=subprocess.PIPE, shell=True)
+            print(p.communicate()[0])
             return
         except Exception as e:
-            print(e)
             return e
 
     try:
-        print(f"Running {s_name}...")
-        subprocess.run(["python3", s_name], cwd=path)
+        subprocess.run([Path(sys.executable).resolve(), s_name], cwd=path)
         return
     except Exception as e:
-        print(e)
         return e
 
 

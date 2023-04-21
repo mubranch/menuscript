@@ -171,7 +171,6 @@ def reset() -> None:
     """
 
     shutil.rmtree(settings.user_data_path)
-    restart()
 
 
 def restart() -> None:

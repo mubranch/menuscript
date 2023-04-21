@@ -51,7 +51,7 @@ def execute(item: dict, _) -> any:
         return e
 
 
-def test_execute():
+def test1():
     with pytest.raises(ValueError):
         item = {
             "name": "test",

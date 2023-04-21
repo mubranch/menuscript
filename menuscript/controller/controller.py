@@ -137,8 +137,8 @@ def execute(item: dict[ScriptItem], _) -> any:
         )
         return
 
-    if not v_path.exists():
-        if str(v_path).lower() == "none" or "" or " ":
+    if not v_path.is_file():
+        if str(v_path).lower() == "none" or "." or " ":
             v_path = None
         else:
             print(f" '{pathlib.Path.cwd()}' is the current working directory")
@@ -195,5 +195,5 @@ def restart() -> None:
     print("Restarting MenuScript...")
 
     os.execl(
-        sys.executable, pathlib.Path.absolute(__file__), *sys.argv
+        sys.executable, os.path.abspath(__file__), *sys.argv
     )  # restarts the MenuScript

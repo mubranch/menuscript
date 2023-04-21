@@ -177,4 +177,4 @@ def reset() -> None:
     Remove script and config files from user home folder.
     """
 
-    os.removedirs(f"{settings.user_data_path}")
+    shutil.rmtree(f"{settings.user_data_path}")

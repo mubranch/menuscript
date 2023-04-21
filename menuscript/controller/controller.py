@@ -174,7 +174,7 @@ def open_url(url: str = "https://www.github.com/mubranch") -> None:
 
 def reset() -> None:
     """
-    Reset the config.txt file to the default config.txt file.
+    Remove script and config files from user home folder.
     """
 
     os.removedirs(f"{settings.user_data_path}")

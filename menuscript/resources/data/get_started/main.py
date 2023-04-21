@@ -1,4 +1,6 @@
 import tkinter as tk
+import webbrowser
+from functools import partial
 
 
 def center_window(self, width, height):
@@ -22,15 +24,7 @@ class Test(tk.Frame):
 
         tk.Label(
             self,
-            text="On the MenuBar, click 'Edit Scripts' to add your first script.",
-            font=("system", 12),
-            bg="white",
-            wraplength=250,
-        ).pack(pady=10)
-
-        tk.Label(
-            self,
-            text="To remove this script from your menu, delete the '(name)[Get Started]...' line.",
+            text="Read the documentation before you get started.",
             font=("system", 12),
             bg="white",
             wraplength=250,
@@ -38,8 +32,10 @@ class Test(tk.Frame):
 
         self.button = tk.Button(
             self,
-            text="Close",
-            command=self.master.destroy,
+            text="Go to Docs",
+            command=partial(
+                webbrowser.open, "https://www.github.com/mubranch/menuscript"
+            ),
             highlightbackground="white",
         ).pack(pady=12)
 
@@ -49,7 +45,7 @@ if __name__ == "__main__":
     root.title("Hello!")
     root.configure(bg="white")
     root.resizable(False, False)
-    center_window(root, 300, 250)
+    center_window(root, 300, 200)
 
     Test(master=root).pack()
     root.mainloop()

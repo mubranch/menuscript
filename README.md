@@ -22,6 +22,7 @@
 
 - [About](#about)
 - [Getting Started](#getting_started)
+- [Editing Scripts](#editing_scripts)
 
 ## About <a name = "about"></a>
 
@@ -39,14 +40,18 @@ To install and use MenuScript on macOS, follow these steps:
 
 If you encounter issues with scripts failing to run, ensure that MenuScript has the necessary permissions. You can grant these permissions by going to System Preferences -> Security & Privacy -> Privacy -> Accessibility, and adding MenuScript to the list of applications allowed to control your computer.
 
+## Editing Scripts <a name = "editing_scripts"></a>
+
 To edit scripts in MenuScript, open the application and click the 'Edit Scripts' button. This will open the config file in your default text editor. You can add new scripts by adding a new line in the following format:
 
 ```
-(name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Optional Absolute/path/to/venv/bin/pythonexecutable)
+(name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Absolute/path/to/venv/bin/pythonexecutable)
+
 ```
 Save the config file and restart MenuScript.
 
-The virtual environment (venv) parameter is optional. If you don't want to use a virtual environment, leave it blank as follows:
+The virtual environment (venv) parameter is optional. If you don't want to use a virtual environment, leave it blank and the script
+will be executed by your global python installation:
 
 ```
 (name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)[]

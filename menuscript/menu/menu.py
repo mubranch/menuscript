@@ -41,7 +41,6 @@ class MenuBarApp(rumps.App):
                     rumps.MenuItem("More..."),
                     [
                         rumps.MenuItem("Documentation", callback=self.read_docs),
-                        # rumps.MenuItem("Restart", callback=self.restart_app),
                         rumps.MenuItem("Reset", callback=self.reset_app),
                     ],
                 ],
@@ -55,7 +54,6 @@ class MenuBarApp(rumps.App):
                 rumps.MenuItem("More..."),
                 [
                     rumps.MenuItem("Documentation", callback=self.read_docs),
-                    # rumps.MenuItem("Restart", callback=self.restart_app),
                     rumps.MenuItem("Reset", callback=self.reset_app),
                 ],
             ],
@@ -96,12 +94,3 @@ class MenuBarApp(rumps.App):
         """
 
         controller.reset()
-
-    def restart_app(self, _):
-        """
-        Restarts the MenuScript app.
-
-        :params self: the MenuBarApp object.
-        """
-
-        controller.restart()

@@ -14,6 +14,15 @@ import pathlib
 
 
 class ScriptItem:
+    """
+    Represents a script item in the menu bar app.
+
+    :param name: name of the script
+    :param s_path: path to the script file
+    :param v_path: path to the virtual environment executable
+
+    """
+
     def __init__(self, name: str, s_path: str, v_path: str) -> None:
         self.name = name
         self.s_path = s_path
@@ -30,23 +39,31 @@ class ScriptItem:
 
 
 def items_to_dict(items: list[ScriptItem]) -> dict:
+    """
+    Converts a list of ScriptItem objects to a dictionary.
+
+    :param items: list of ScriptItem objects
+    """
+
     if items is None:
         return None
 
     d_items = {}
     for item in items:
         d_items[item.name] = item.to_dict()
+
     return d_items
 
 
-def create_config():
+def create_config() -> None:
     """
-    Creates a config file in the user home folder if it doesn't exist.
-    Copies the default config file from the data folder into the user home folder.
-    Copies the get_started script into the user home folder.
-    Copies the settings.py file into the user home folder.
+    Updates the config file in the user's home folder if it exists; otherwise, creates a
+    new one. Copies the default config file from the data folder into the user's home
+    folder. Also, copies the get_started script file into the user's home folder.
+    """
 
-    """
+    if pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
+        raise FileExistsError("User config file already exists but should not.")
 
     # read default config file from data folder
     with open(f"{settings.data_path}/config.txt", "r") as f:
@@ -55,12 +72,18 @@ def create_config():
     # create hidden .menuscript folder if it doesn't exist
     pathlib.Path.mkdir(settings.user_data_path)
 
-    # write new config into user home folder
-    with open(f"{settings.user_data_path}/config.txt", "x") as f:
-        for line in lines:
-            if line.startswith("(name)"):
-                line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"  # noqa: E501
-            f.write(line)
+    try:
+        # write new config into user home folder
+        with open(f"{settings.user_data_path}/config.txt", "x") as f:
+            for line in lines:
+                if line.startswith("(name)"):
+                    line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"  # noqa: E501
+                f.write(line)
+
+    except PermissionError:
+        raise PermissionError(
+            "MenuScript does not have permission to write to the user home directory."
+        )
 
     # copy get_started script into user home folder
     src = f"{settings.data_path}/get_started"
@@ -70,10 +93,17 @@ def create_config():
 
 
 def open_config() -> None:
+    """
+    Opens the config file in the user's config file with the default text editor.
+    """
     subprocess.Popen(["open", f"{settings.user_data_path}/config.txt"])
 
 
-def load_items() -> list[ScriptItem]:
+def load_items() -> any:
+    """
+    Loads the items from the config file in the user's home folder. Returns a list of
+    ScriptItem objects.
+    """
     items = []
 
     if not pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
@@ -81,6 +111,8 @@ def load_items() -> list[ScriptItem]:
 
     with open(f"{settings.user_data_path}/config.txt", "r") as f:
         lines = f.readlines()
+
+    # format config file line to get name, script path, and virtual environment path
 
     for line in lines:
         line = line.strip()
@@ -102,6 +134,11 @@ def load_items() -> list[ScriptItem]:
             end = line.index("]", start + 1)
             v_path = line[start + 1 : end]
 
+            if name == "" or s_path == "":
+                raise ValueError(
+                    "One of the items in the user config file is missing a value."
+                )
+
             items.append(ScriptItem(name, s_path, v_path))
 
     if len(items) == 0:
@@ -118,6 +155,7 @@ def execute(item: dict[ScriptItem], _) -> any:
 
     :param item: ScriptItem object
     """
+
     s_path = item["s_path"]
     s_path = pathlib.Path(s_path)
     v_path = item["v_path"]
@@ -173,7 +211,7 @@ def reset() -> None:
     shutil.rmtree(settings.user_data_path)
 
 
-def restart() -> None:
+def restart(self) -> None:
     """
     Restart MenuScript.
     """

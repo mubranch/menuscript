@@ -41,6 +41,7 @@ class MenuBarApp(rumps.App):
                     rumps.MenuItem("More..."),
                     [
                         rumps.MenuItem("Documentation", callback=self.read_docs),
+                        rumps.MenuItem("Raise an Issue.", callback=self.report),
                         rumps.MenuItem("Reset", callback=self.reset_app),
                     ],
                 ],
@@ -54,6 +55,7 @@ class MenuBarApp(rumps.App):
                 rumps.MenuItem("More..."),
                 [
                     rumps.MenuItem("Documentation", callback=self.read_docs),
+                    rumps.MenuItem("Raise an Issue.", callback=self.report),
                     rumps.MenuItem("Reset", callback=self.reset_app),
                 ],
             ],
@@ -68,14 +70,14 @@ class MenuBarApp(rumps.App):
 
         controller.open_config()
 
-    def report_bug(self, _):
+    def report(self, _):
         """
         Opens the GitHub issues page in the default browser.
 
         :params self: the MenuBarApp object.
         """
 
-        controller.open_url("https://www.github.com/mubranch/menuscript")
+        controller.open_url("https://github.com/mubranch/menuscript/issues")
 
     def read_docs(self, _):
         """

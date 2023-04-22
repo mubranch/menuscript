@@ -91,7 +91,7 @@ Upcoming Release: Version X.Y.Z
 ## Built Using <a name = "built_using"></a>
 
 - [Rumps](https://rumps.readthedocs.io/en/latest/) - rumps
-- [PyInstaller](https://pyinstaller.org/en/stable/) - PyInstaller
+- [Py2App](https://py2app.readthedocs.io/en/latest/) - Py2App
 
 ## Authors <a name = "authors"></a>
 

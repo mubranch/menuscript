@@ -78,8 +78,7 @@ def create_config() -> None:
         with open(f"{settings.user_data_path}/config.txt", "x") as f:
             for line in lines:
                 if line.startswith("(name)"):
-                    line = f"(name)[Get Started](script)[{settings.user_data_path}"
-                    "/get_started/main.py](venv)[]"
+                    line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"
                 f.write(line)
 
     except PermissionError:
@@ -120,6 +119,9 @@ def load_items() -> any:
     # format config file line to get name, script path, and virtual environment path
 
     for line in lines:
+        if not line:
+            break
+
         line = line.strip()
 
         if line.startswith("("):

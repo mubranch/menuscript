@@ -58,6 +58,16 @@ will be executed by your global python installation:
 
 Periodic updates are made to MenuScript to add new features and improve user-friendliness.
 
+## Add MenuScript to Login Items
+
+To add MenuScript to your login items, follow these steps:
+
+1. Open System Preferences.
+2. Click Users & Groups.
+3. Click Login Items.
+4. Click the '+' button.
+5. Navigate to the MenuScript application in your Applications folder and click 'Add'.
+
 ### Prerequisites
 
 1. Python 3 must be installed on your macOS system.

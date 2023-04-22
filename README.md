@@ -46,7 +46,6 @@ To edit scripts in MenuScript, open the application and click the 'Edit Scripts'
 
 ```
 (name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Absolute/path/to/venv/bin/pythonexecutable)
-
 ```
 Save the config file and restart MenuScript.
 

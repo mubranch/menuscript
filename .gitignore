@@ -165,3 +165,5 @@ tests/
 .vscode/
 setup.py
 paths.txt
+gui/gui.py
+gui/

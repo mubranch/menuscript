@@ -1,6 +1,7 @@
 # scripty/controllers/controllers.py
 
 from resources import settings
+import rumps
 import sys
 import subprocess
 import os
@@ -77,12 +78,15 @@ def create_config() -> None:
         with open(f"{settings.user_data_path}/config.txt", "x") as f:
             for line in lines:
                 if line.startswith("(name)"):
-                    line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"  # noqa: E501
+                    line = f"(name)[Get Started](script)[{settings.user_data_path}"
+                    "/get_started/main.py](venv)[]"
                 f.write(line)
 
     except PermissionError:
-        raise PermissionError(
-            "MenuScript does not have permission to write to the user home directory."
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Initial setup",
+            message="MenuScript does not have permission to write to the user home directory.",
         )
 
     # copy get_started script into user home folder
@@ -105,6 +109,7 @@ def load_items() -> any:
     ScriptItem objects.
     """
     items = []
+    names = set()
 
     if not pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
         create_config()
@@ -134,11 +139,23 @@ def load_items() -> any:
             end = line.index("]", start + 1)
             v_path = line[start + 1 : end]
 
-            if name == "" or s_path == "":
-                raise ValueError(
-                    "One of the items in the user config file is missing a value."
+            if name == "" or not pathlib.Path(s_path).is_file():
+                rumps.notification(
+                    title="MenuScript",
+                    subtitle="Invalid config file",
+                    message="Scripts must have a name, and the script path must be a valid file path.",
+                )
+                continue
+
+            if name in names:
+                rumps.notification(
+                    title="MenuScript",
+                    subtitle="Invalid config file",
+                    message="Scripts must have unique names. This is a limitation of Rumps,"
+                    " the framework used to build MenuScript.",
                 )
 
+            names.add(name)
             items.append(ScriptItem(name, s_path, v_path))
 
     if len(items) == 0:
@@ -182,16 +199,37 @@ def execute(item: dict[ScriptItem], _) -> any:
 
         try:
             p = subprocess.Popen(cmd, cwd=str(path), stdout=subprocess.PIPE, shell=True)
-            print(p.communicate()[0])
+            rumps.notification(
+                title="MenuScript",
+                subtitle="Running script",
+                message=f"Script executed with message {p.communicate()[0]}",
+            )  # noqa: E501
             return
         except Exception as e:
+            rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)
             return e
 
     # If no virtual environment is configured, run script with global python interpreter
     try:
-        subprocess.run([str(pathlib.Path(sys.executable)), s_name], cwd=path)
+        p = subprocess.run(
+            [str(pathlib.Path(sys.executable)), s_name],
+            stdout=subprocess.PIPE,
+            cwd=path,
+        )
+
+        msg = None
+
+        if p.check_returncode() is None:
+            msg = "Success"
+
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Running script",
+            message=f"Script executed with message '{msg}'",
+        )
         return
     except Exception as e:
+        rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)
         return e
 
 
@@ -199,7 +237,6 @@ def open_url(url: str = "https://www.github.com/mubranch") -> None:
     """
     Open the Documentation for this project in the user's default browser.
     """
-
     webbrowser.open(url)
 
 
@@ -207,15 +244,18 @@ def reset() -> None:
     """
     Remove script and config files from user home folder.
     """
-
     shutil.rmtree(settings.user_data_path)
+    rumps.notification(
+        title="MenuScript",
+        subtitle="Reset",
+        message="Reset complete. Restart MenuScript for changes to take effect",
+    )
 
 
 def restart(self) -> None:
     """
     Restart MenuScript.
     """
-
     os.execl(
         sys.executable, os.path.abspath(__file__), *sys.argv
     )  # restarts the MenuScript

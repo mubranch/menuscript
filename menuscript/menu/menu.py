@@ -15,14 +15,10 @@ class MenuBarApp(rumps.App):
     :param items: list of ScriptItem objects loaded from user_config.txt.
     """
 
-    items = list[controller.ScriptItem]
-
-    def __init__(
-        self, name: str, icon: str, items: list[controller.ScriptItem]
-    ) -> None:
+    def __init__(self, name: str, icon: str, items: list) -> None:
         super().__init__(name=name, icon=icon)
 
-        self.items = controller.items_to_dict(items)
+        self.items = items
         self.init_menu()
 
     def init_menu(self) -> None:
@@ -32,21 +28,16 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        for i, key in enumerate(self.items):
-            self.menu.add(rumps.MenuItem(key))
-            item = self.menu.get(key)
-            name = self.items[key].get("name")
+        for i, (name, source, interpreter) in enumerate(self.items):
+            self.menu.add(rumps.MenuItem(name))
+            item = self.menu.get(name)
 
             name_label = f"Name: {name}"
-
-            source = self.items[key].get("source")
 
             s = str(controller.pathlib.Path(source)).split("/")[-1]
             source_label = f"Source: '{s}'"
 
-            interpreter = self.items[key].get("interpreter")
-
-            if interpreter == "":
+            if interpreter is None:
                 interpreter_label = "Interpreter: 'Global'"
             else:
                 i_dir_name = str(controller.pathlib.Path(interpreter)).split("/")[-3]
@@ -58,21 +49,26 @@ class MenuBarApp(rumps.App):
                     rumps.MenuItem(
                         "Run",
                         key=f"{i}",
-                        callback=partial(controller.execute, self.items[key]),
+                        callback=partial(
+                            controller.execute, (name, source, interpreter)
+                        ),
                     ),
                     None,
                     rumps.MenuItem(
                         "Schedule",
-                        callback=partial(controller.schedule_job, self.items[key]),
+                        # callback=partial(controller.schedule_job, self.items[key]),
                     ),
                     [
                         rumps.MenuItem(
-                            "Edit", callback=partial(self.edit, self.items[key])
+                            "Edit",
+                            callback=partial(self.edit, (name, source, interpreter)),
                         ),
                         [
                             rumps.MenuItem(
                                 f"{name_label}",
-                                callback=partial(self.edit, self.items[key]),
+                                callback=partial(
+                                    self.edit, (name, source, interpreter)
+                                ),
                             ),
                             rumps.MenuItem(
                                 f"{source_label}",
@@ -99,27 +95,27 @@ class MenuBarApp(rumps.App):
             ],
         ]
 
-    def edit(self, item: dict, _):
+    def edit(self, item: tuple, _):
         """
         Opens the user_config.txt file in the default text editor.
 
         :params self: the MenuBarApp object.
         """
-        old_name = item.get("name")
+        old_name = item[0]
 
         e = classes.EditName(old_name)
         e.__setattr__("icon", f"{controller.settings.app_path}/imgs/icon.icns")
         response = e.run()
 
-        if response.clicked:
+        if response.clicked and response.text != old_name:
             new_name = response.text
             top_level_item = self.menu.get(old_name)
-            controller.update_name(self.items.get(old_name), new_name)
+            controller.update_name(self.items.get(item), new_name)
             top_level_item.__setattr__("title", new_name)
             sub_menu = top_level_item["Edit"]
             sub_menu.get(f"Name: {old_name}").__setattr__("title", f"Name: {new_name}")
 
-    def edit_path(self, item: controller.ScriptItem, sender):
+    def edit_path(self, item: tuple, sender):
         """
         Opens the user_config.txt file in the default text editor.
 

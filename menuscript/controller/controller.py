@@ -14,55 +14,7 @@ import pathlib
 # Implement correct logging later
 
 
-class ScriptItem:
-    """
-    Represents a script item in the menu bar app.
-
-    :param name: name of the script
-    :param source: path to the script file
-    :param interpreter: path to the virtual environment executable
-
-    """
-
-    def __init__(self, name: str, source: str, interpreter: str, *args) -> None:
-        self.name = name
-        self.source = source
-        self.interpreter = interpreter
-        self.schedule = args[0] if len(args) > 0 else None
-
-    def __str__(self) -> str:
-        return f"name: {self.name} | source: {self.source} | interpreter: {self.interpreter} | schedule: {self.schedule}"
-
-    def __repr__(self) -> str:
-        return f"name: {self.name} | source: {self.source} | interpreter: {self.interpreter} | schedule: {self.schedule}"
-
-    def to_dict(self) -> dict:
-        return {
-            "name": self.name,
-            "source": self.source,
-            "interpreter": self.interpreter,
-            "schedule": self.schedule,
-        }
-
-
-def items_to_dict(items: list[ScriptItem]) -> dict:
-    """
-    Converts a list of ScriptItem objects to a dictionary.
-
-    :param items: list of ScriptItem objects
-    """
-
-    if items is None:
-        return None
-
-    d_items = {}
-    for item in items:
-        d_items[item.name] = item.to_dict()
-
-    return d_items
-
-
-def schedule_job(item: ScriptItem):
+def schedule_job(item: dict):
     """
         Executes a script item in a cron job.
 
@@ -180,8 +132,11 @@ def load_items() -> any:
                     " the framework used to build MenuScript.",
                 )
 
+            if not pathlib.Path(interpreter).is_file():
+                interpreter = None
+
             names.add(name)
-            items.append(ScriptItem(name, source, interpreter))
+            items.append((name, source, interpreter))
 
     if len(items) == 0:
         return None
@@ -189,7 +144,7 @@ def load_items() -> any:
     return items
 
 
-def update_name(item: dict, new_name: str) -> None:
+def update_name(item: tuple, new_name: str) -> None:
     """
     Updates the name of a script item in the config file.
 
@@ -209,9 +164,9 @@ def update_name(item: dict, new_name: str) -> None:
         lines = f.readlines()
 
     with open(f"{settings.user_data_path}/config.txt", "w") as f:
-        name = item.get("name")
-        source = item.get("source")
-        interpreter = item.get("interpreter")
+        name = item[0]
+        source = item[1]
+        interpreter = item[2]
         for line in lines:
             line = line.strip()  # clear whitespace
             if line.startswith(f"(name)[{name}]"):
@@ -219,7 +174,7 @@ def update_name(item: dict, new_name: str) -> None:
             f.write(f"{line}\n")
 
 
-def execute(item: dict[ScriptItem], _) -> any:
+def execute(item: tuple, _) -> any:
     """
     Execute the script displayed in the menu bar. If a virtual environement is
     configured in the config.txt file, it will activate the virtual environemnt.
@@ -228,10 +183,14 @@ def execute(item: dict[ScriptItem], _) -> any:
     :param item: ScriptItem object
     """
 
-    source = item["source"]
+    source = item[1]
     source = pathlib.Path(source)
-    interpreter = item["interpreter"]
-    interpreter = pathlib.Path(interpreter)
+    interpreter = item[2]
+
+    try:
+        interpreter = pathlib.Path(interpreter)
+    except TypeError:
+        interpreter = None
 
     # Check if paths in config.txt are valid
 
@@ -240,7 +199,7 @@ def execute(item: dict[ScriptItem], _) -> any:
             "...(script)[path/to/script]... in user config file is not a '.py' file"
         )
 
-    if not interpreter.is_file():
+    if interpreter is not None:
         if str(interpreter).lower() == "none" or "." or " ":
             interpreter = None
 

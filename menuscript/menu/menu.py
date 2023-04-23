@@ -1,3 +1,5 @@
+# menuscript/menu/menu.py
+
 import rumps
 import controller.controller as controller
 from functools import partial
@@ -36,13 +38,14 @@ class MenuBarApp(rumps.App):
             self.menu = [
                 *self.items,
                 None,
-                rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
                 [
                     rumps.MenuItem("More..."),
                     [
+                        rumps.MenuItem("Edit scripts", callback=self.edit_scripts),
+                        None,
+                        rumps.MenuItem("Raise an issue", callback=self.report_issue),
                         rumps.MenuItem("Documentation", callback=self.read_docs),
-                        rumps.MenuItem("Raise an Issue.", callback=self.report),
-                        rumps.MenuItem("Reset", callback=self.reset_app),
+                        rumps.MenuItem("Reset application", callback=self.reset_app),
                     ],
                 ],
             ]
@@ -50,13 +53,14 @@ class MenuBarApp(rumps.App):
 
         self.menu = [
             None,
-            rumps.MenuItem("Edit Scripts", callback=self.edit_scripts),
             [
                 rumps.MenuItem("More..."),
                 [
+                    rumps.MenuItem("Edit scripts", callback=self.edit_scripts),
+                    None,
+                    rumps.MenuItem("Raise an issue", callback=self.report_issue),
                     rumps.MenuItem("Documentation", callback=self.read_docs),
-                    rumps.MenuItem("Raise an Issue.", callback=self.report),
-                    rumps.MenuItem("Reset", callback=self.reset_app),
+                    rumps.MenuItem("Reset application", callback=self.reset_app),
                 ],
             ],
         ]
@@ -70,7 +74,7 @@ class MenuBarApp(rumps.App):
 
         controller.open_config()
 
-    def report(self, _):
+    def report_issue(self, _):
         """
         Opens the GitHub issues page in the default browser.
 

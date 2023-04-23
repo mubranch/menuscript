@@ -1,4 +1,4 @@
-# scripty/controllers/controllers.py
+# menuscript/controllers/controllers.py
 
 from resources import settings
 import rumps

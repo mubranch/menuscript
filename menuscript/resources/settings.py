@@ -1,4 +1,4 @@
-# scripty/settings.py
+# menuscript/resources/settings.py
 
 
 def init():

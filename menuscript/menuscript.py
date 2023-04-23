@@ -1,3 +1,5 @@
+# menuscript/menuscript.py
+
 from menu.menu import MenuBarApp
 import controller.controller as controller
 import resources.settings as settings

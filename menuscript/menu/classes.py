@@ -312,4 +312,13 @@ class EditSource:
 
 
 class EditInterpreter:
-    ...
+    def __init__(self, name: str):
+        super().__init__(
+            message="",
+            title="",
+            default_text=name,
+            ok="Rename",
+            cancel="Cancel",
+            dimensions=(220, 20),
+            secure=False,
+        )

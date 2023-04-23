@@ -31,14 +31,78 @@ def schedule_job(item: dict):
     pass
 
 
+def remove_item(item: tuple) -> None:
+    """
+    Removes a script item from the user_config.txt file.
+
+    """
+
+    with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        lines = f.readlines()
+
+    try:
+        with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+            for line in lines:
+                if line.startswith("(name)"):
+                    continue
+                f.write(line)
+
+    except PermissionError:
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Initial setup",
+            message="MenuScript does not have permission to write to the user home directory.",
+        )
+
+
+def open_interpreter_picker() -> str:
+    cmd = f"python {settings.user_data_path}/.ui/interpreter.py"
+    try:
+        p = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+        return p.communicate()[0].decode("utf-8")
+    except Exception as e:
+        raise (e)
+
+
+def open_filepicker() -> str:
+    cmd = f"python {settings.user_data_path}/.ui/file.py"
+    try:
+        p = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+        return p.communicate()[0].decode("utf-8")
+    except Exception as e:
+        raise (e)
+
+
+def move_ui() -> None:
+    """
+    Copy filedialog UI to user .menuscript folder.
+
+    """
+    if pathlib.Path(f"{settings.user_data_path}").exists():
+        src = f"{settings.data_path}/ui"
+        dest = f"{settings.user_data_path}/.ui"
+
+        shutil.copytree(src, dest)
+
+
 def create_config() -> None:
     """
     Updates the config file in the user's home folder if it exists; otherwise, creates a
     new one. Copies the default config file from the data folder into the user's home
-    folder. Also, copies the get_started script file into the user's home folder.
+    folder. Also, copies the example script file into the user's home folder.
     """
 
-    if pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
+    if pathlib.Path(f"{settings.user_data_path}/.config.txt").exists():
         raise FileExistsError("User config file already exists but should not.")
 
     # read default config file from data folder
@@ -50,10 +114,10 @@ def create_config() -> None:
 
     try:
         # write new config into user home folder
-        with open(f"{settings.user_data_path}/config.txt", "x") as f:
+        with open(f"{settings.user_data_path}/.config.txt", "x") as f:
             for line in lines:
                 if line.startswith("(name)"):
-                    line = f"(name)[Get Started](script)[{settings.user_data_path}/get_started/main.py](venv)[]"
+                    line = f"(name)[Example](script)[{settings.user_data_path}/example/main.py](venv)[]"
                 f.write(line)
 
     except PermissionError:
@@ -63,9 +127,9 @@ def create_config() -> None:
             message="MenuScript does not have permission to write to the user home directory.",
         )
 
-    # copy get_started script into user home folder
-    src = f"{settings.data_path}/get_started"
-    dest = f"{settings.user_data_path}/get_started"
+    # copy example script into user home folder
+    src = f"{settings.data_path}/example"
+    dest = f"{settings.user_data_path}/example"
 
     shutil.copytree(src, dest)
 
@@ -74,7 +138,21 @@ def open_config() -> None:
     """
     Opens the config file in the user's config file with the default text editor.
     """
-    subprocess.Popen(["open", f"{settings.user_data_path}/config.txt"])
+    subprocess.Popen(["open", f"{settings.user_data_path}/.config.txt"])
+
+
+def get_source_label(source: str) -> str:
+    s = str(pathlib.Path(source)).split("/")[-1]
+    return f"Source: '{s}'"
+
+
+def get_interpreter_label(interpreter: str) -> str:
+    i_ex_name = str(pathlib.Path(interpreter)).split("/")[-1]
+    return f"Interpreter: '(venv) {i_ex_name}'"
+
+
+def get_name_label(name: str) -> str:
+    return f"Name: '{name}'"
 
 
 def load_items() -> any:
@@ -85,10 +163,11 @@ def load_items() -> any:
     items = []
     names = set()
 
-    if not pathlib.Path(f"{settings.user_data_path}/config.txt").exists():
+    if not pathlib.Path(f"{settings.user_data_path}/.config.txt").exists():
         create_config()
+        move_ui()
 
-    with open(f"{settings.user_data_path}/config.txt", "r") as f:
+    with open(f"{settings.user_data_path}/.config.txt", "r") as f:
         lines = f.readlines()
 
     # format config file line to get name, script path, and virtual environment path
@@ -144,7 +223,7 @@ def load_items() -> any:
     return items
 
 
-def update_name(item: tuple, new_name: str) -> None:
+def update_name(item: tuple, new_name: str) -> bool:
     """
     Updates the name of a script item in the config file.
 
@@ -158,12 +237,12 @@ def update_name(item: tuple, new_name: str) -> None:
             subtitle="Invalid name",
             message="Script names cannot be empty.",
         )
-        return
+        return False
 
-    with open(f"{settings.user_data_path}/config.txt", "r") as f:
+    with open(f"{settings.user_data_path}/.config.txt", "r") as f:
         lines = f.readlines()
 
-    with open(f"{settings.user_data_path}/config.txt", "w") as f:
+    with open(f"{settings.user_data_path}/.config.txt", "w") as f:
         name = item[0]
         source = item[1]
         interpreter = item[2]
@@ -172,6 +251,56 @@ def update_name(item: tuple, new_name: str) -> None:
             if line.startswith(f"(name)[{name}]"):
                 line = f"(name)[{new_name}](script)[{source}](venv)[{interpreter}]"
             f.write(f"{line}\n")
+
+    return True
+
+
+def update_source(item: tuple, new_source: str) -> bool:
+    if new_source == "":
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Invalid source",
+            message="Script source cannot be empty.",
+        )
+        return False
+
+    with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        lines = f.readlines()
+
+    with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+        name = item[0]
+        interpreter = item[2]
+        for line in lines:
+            line = line.strip()  # clear whitespace
+            if line.startswith(f"(name)[{name}]"):
+                line = f"(name)[{name}](script)[{new_source}](venv)[{interpreter}]"
+            f.write(f"{line}\n")
+
+    return True
+
+
+def update_interpreter(item: tuple, new_interpreter: str) -> bool:
+    if new_interpreter == "":
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Invalid source",
+            message="Script source cannot be empty.",
+        )
+        return False
+
+    with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        lines = f.readlines()
+
+    with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+        name = item[0]
+        source = item[1]
+        for line in lines:
+            line = line.strip()  # clear whitespace
+            if line.startswith(f"(name)[{name}]"):
+                line = f"(name)[{name}](script)[{source}](venv)[{new_interpreter}]"
+            f.write(f"{line}\n")
+
+    return True
 
 
 def execute(item: tuple, _) -> any:

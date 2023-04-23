@@ -3,7 +3,7 @@
 from menu.menu import MenuBarApp
 import controller.controller as controller
 import resources.settings as settings
-import os
+import pathlib
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
 
     menu = MenuBarApp(
         name="MenuScript",
-        icon=os.path.join(settings.image_path, "light.icns"),
+        icon=str(pathlib.Path(f"{settings.image_path}/light.icns")),
         items=items,
     )
 

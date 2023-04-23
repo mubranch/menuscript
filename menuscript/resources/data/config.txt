@@ -4,6 +4,7 @@
 #
 # :format: (name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Optional Absolute/path/to/venv/bin/pythonexecutable)
 #
-#
+# Enter items below without leading '#'
+# ---------------------
 
-(name)[Get Started](script)[./menuscript/resources/data/get_started/main.py](venv)[]
+(name)[Example](script)[./menuscript/resources/data/get_started/main.py](venv)[]

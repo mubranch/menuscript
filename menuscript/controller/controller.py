@@ -19,28 +19,28 @@ class ScriptItem:
     Represents a script item in the menu bar app.
 
     :param name: name of the script
-    :param s_path: path to the script file
-    :param v_path: path to the virtual environment executable
+    :param source: path to the script file
+    :param interpreter: path to the virtual environment executable
 
     """
 
-    def __init__(self, name: str, s_path: str, v_path: str, *args) -> None:
+    def __init__(self, name: str, source: str, interpreter: str, *args) -> None:
         self.name = name
-        self.s_path = s_path
-        self.v_path = v_path
+        self.source = source
+        self.interpreter = interpreter
         self.schedule = args[0] if len(args) > 0 else None
 
     def __str__(self) -> str:
-        return f"name: {self.name} | s_path: {self.s_path} | v_path: {self.v_path} | schedule: {self.schedule}"
+        return f"name: {self.name} | source: {self.source} | interpreter: {self.interpreter} | schedule: {self.schedule}"
 
     def __repr__(self) -> str:
-        return f"name: {self.name} | s_path: {self.s_path} | v_path: {self.v_path} | schedule: {self.schedule}"
+        return f"name: {self.name} | source: {self.source} | interpreter: {self.interpreter} | schedule: {self.schedule}"
 
     def to_dict(self) -> dict:
         return {
             "name": self.name,
-            "s_path": self.s_path,
-            "v_path": self.v_path,
+            "source": self.source,
+            "interpreter": self.interpreter,
             "schedule": self.schedule,
         }
 
@@ -64,9 +64,16 @@ def items_to_dict(items: list[ScriptItem]) -> dict:
 
 def schedule_job(item: ScriptItem):
     """
-    Executes a script item in a cron job.
+        Executes a script item in a cron job.
 
-    :param item: the script item to execute.
+        :param item: the script item to execute.
+
+    Minute. The minute of the hour the command will run on, ranging from 0-59.
+    Hour. The hour the command will run at, ranging from 0-23 in the 24-hour notation.
+    Day of the month. The day of the month the user wants the command to run on, ranging from 1-31.
+    Month. The month that the user wants the command to run in, ranging from 1-12, thus representing January-December.
+    Day of the week. The day of the week for a command to run on, ranging from 0-6, representing Sunday-Saturday. In some systems, the value 7 represents Sunday.
+
     """
 
     pass
@@ -149,15 +156,15 @@ def load_items() -> any:
 
             start = line.index("[")
             end = line.index("]", start + 1)
-            s_path = line[start + 1 : end]
+            source = line[start + 1 : end]
 
             line = line[end:]
 
             start = line.index("[")
             end = line.index("]", start + 1)
-            v_path = line[start + 1 : end]
+            interpreter = line[start + 1 : end]
 
-            if name == "" or not pathlib.Path(s_path).is_file():
+            if name == "" or not pathlib.Path(source).is_file():
                 rumps.notification(
                     title="MenuScript",
                     subtitle="Invalid config file",
@@ -174,7 +181,7 @@ def load_items() -> any:
                 )
 
             names.add(name)
-            items.append(ScriptItem(name, s_path, v_path))
+            items.append(ScriptItem(name, source, interpreter))
 
     if len(items) == 0:
         return None
@@ -191,29 +198,29 @@ def execute(item: dict[ScriptItem], _) -> any:
     :param item: ScriptItem object
     """
 
-    s_path = item["s_path"]
-    s_path = pathlib.Path(s_path)
-    v_path = item["v_path"]
-    v_path = pathlib.Path(v_path)
+    source = item["source"]
+    source = pathlib.Path(source)
+    interpreter = item["interpreter"]
+    interpreter = pathlib.Path(interpreter)
 
     # Check if paths in config.txt are valid
 
-    if not s_path.is_file() or not str(s_path).endswith(".py"):
+    if not source.is_file() or not str(source).endswith(".py"):
         raise ValueError(
             "...(script)[path/to/script]... in user config file is not a '.py' file"
         )
 
-    if not v_path.is_file():
-        if str(v_path).lower() == "none" or "." or " ":
-            v_path = None
+    if not interpreter.is_file():
+        if str(interpreter).lower() == "none" or "." or " ":
+            interpreter = None
 
-    # Get script name from s_path
-    s_name = str(s_path).split("/")[-1]
-    path = pathlib.Path("/".join(str(s_path).split("/")[:-1]))
+    # Get script name from source
+    s_name = str(source).split("/")[-1]
+    path = pathlib.Path("/".join(str(source).split("/")[:-1]))
 
-    if v_path:  # will be None or a PoxisPath object
-        venv_activate = str(v_path).split("bin")[0] + "bin/activate"
-        cmd = f"source {venv_activate}; {v_path} {s_name}"  # Set bash command for Popen
+    if interpreter:  # will be None or a PoxisPath object
+        venv_activate = str(interpreter).split("bin")[0] + "bin/activate"
+        cmd = f"source {venv_activate}; {interpreter} {s_name}"  # Set bash command for Popen
 
         try:
             p = subprocess.Popen(cmd, cwd=str(path), stdout=subprocess.PIPE, shell=True)
@@ -221,7 +228,7 @@ def execute(item: dict[ScriptItem], _) -> any:
                 title="MenuScript",
                 subtitle="Running script",
                 message=f"Script executed with message {p.communicate()}",
-            )  # noqa: E501
+            )
             return
         except Exception as e:
             rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)

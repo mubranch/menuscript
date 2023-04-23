@@ -31,28 +31,7 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
 
-        if self.items is not None:
-            for key, value in self.items.items():
-                rumps.clicked(key)(partial(controller.execute, value))
-
-            self.menu = [
-                *self.items,
-                None,
-                [
-                    rumps.MenuItem("More..."),
-                    [
-                        rumps.MenuItem("Edit scripts", callback=self.edit_scripts),
-                        None,
-                        rumps.MenuItem("Raise an issue", callback=self.report_issue),
-                        rumps.MenuItem("Documentation", callback=self.read_docs),
-                        rumps.MenuItem("Reset application", callback=self.reset_app),
-                    ],
-                ],
-            ]
-            return
-
         self.menu = [
-            None,
             [
                 rumps.MenuItem("More..."),
                 [
@@ -64,6 +43,51 @@ class MenuBarApp(rumps.App):
                 ],
             ],
         ]
+
+        if self.items is not None:
+            for i, key in enumerate(self.items):
+                self.menu.insert_before(
+                    "More...",
+                    rumps.MenuItem(
+                        title=key,
+                        key=f"{i}",
+                        callback=partial(controller.execute, self.items[key]),
+                    ),
+                )
+
+        # if self.items is not None:
+        #     for key, value in self.items.items():
+        #         rumps.clicked(key)(partial(controller.execute, value))
+
+        #     self.menu = [
+        #         *self.items,
+        #         None,
+        #         [
+        #             rumps.MenuItem("More..."),
+        #             [
+        #                 rumps.MenuItem("Edit scripts", callback=self.edit_scripts),
+        #                 None,
+        #                 rumps.MenuItem("Raise an issue", callback=self.report_issue),
+        #                 rumps.MenuItem("Documentation", callback=self.read_docs),
+        #                 rumps.MenuItem("Factory reset", callback=self.reset_app),
+        #             ],
+        #         ],
+        #     ]
+        #     return
+
+        # self.menu = [
+        #     None,
+        #     [
+        #         rumps.MenuItem("More..."),
+        #         [
+        #             rumps.MenuItem("Edit scripts", callback=self.edit_scripts),
+        #             None,
+        #             rumps.MenuItem("Raise an issue", callback=self.report_issue),
+        #             rumps.MenuItem("Documentation", callback=self.read_docs),
+        #             rumps.MenuItem("Reset application", callback=self.reset_app),
+        #         ],
+        #     ],
+        # ]
 
     def edit_scripts(self, _):
         """

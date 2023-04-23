@@ -24,19 +24,25 @@ class ScriptItem:
 
     """
 
-    def __init__(self, name: str, s_path: str, v_path: str) -> None:
+    def __init__(self, name: str, s_path: str, v_path: str, *args) -> None:
         self.name = name
         self.s_path = s_path
         self.v_path = v_path
+        self.schedule = args[0] if len(args) > 0 else None
 
     def __str__(self) -> str:
-        return f"name: {self.name} | s_path: {self.s_path} | v_path: {self.v_path}"
+        return f"name: {self.name} | s_path: {self.s_path} | v_path: {self.v_path} | schedule: {self.schedule}"
 
     def __repr__(self) -> str:
-        return f"name: {self.name} | s_path: {self.s_path} | v_path: {self.v_path}"
+        return f"name: {self.name} | s_path: {self.s_path} | v_path: {self.v_path} | schedule: {self.schedule}"
 
     def to_dict(self) -> dict:
-        return {"name": self.name, "s_path": self.s_path, "v_path": self.v_path}
+        return {
+            "name": self.name,
+            "s_path": self.s_path,
+            "v_path": self.v_path,
+            "schedule": self.schedule,
+        }
 
 
 def items_to_dict(items: list[ScriptItem]) -> dict:
@@ -54,6 +60,16 @@ def items_to_dict(items: list[ScriptItem]) -> dict:
         d_items[item.name] = item.to_dict()
 
     return d_items
+
+
+def schedule_job(item: ScriptItem):
+    """
+    Executes a script item in a cron job.
+
+    :param item: the script item to execute.
+    """
+
+    pass
 
 
 def create_config() -> None:
@@ -204,7 +220,7 @@ def execute(item: dict[ScriptItem], _) -> any:
             rumps.notification(
                 title="MenuScript",
                 subtitle="Running script",
-                message=f"Script executed with message {p.communicate()[0]}",
+                message=f"Script executed with message {p.communicate()}",
             )  # noqa: E501
             return
         except Exception as e:

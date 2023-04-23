@@ -110,8 +110,21 @@ class MenuBarApp(rumps.App):
         if response.clicked and response.text != old_name:
             new_name = response.text
             top_level_item = self.menu.get(old_name)
-            controller.update_name(self.items.get(item), new_name)
+
+            for name, source, interpreter in self.items:
+                if name == old_name:
+                    self.items.remove((name, source, interpreter))
+                    break
+
+            controller.update_name((old_name, source, interpreter), new_name)
+            new_item = (new_name, item[1], item[2])
+            self.items.extend(new_item)
+
             top_level_item.__setattr__("title", new_name)
+            top_level_item.set_callback(
+                callback=partial(controller.execute, new_item),
+                key=top_level_item.__getattribute__("key"),
+            )
             sub_menu = top_level_item["Edit"]
             sub_menu.get(f"Name: {old_name}").__setattr__("title", f"Name: {new_name}")
 

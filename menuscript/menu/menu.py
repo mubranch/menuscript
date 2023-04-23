@@ -3,7 +3,7 @@
 import rumps
 import controller.controller as controller
 from functools import partial
-from .classes import Window
+from . import classes
 
 
 class MenuBarApp(rumps.App):
@@ -37,19 +37,21 @@ class MenuBarApp(rumps.App):
             item = self.menu.get(key)
             name = self.items[key].get("name")
 
-            path = self.items[key].get("source")
+            name_label = f"Name: {name}"
 
-            p = str(controller.pathlib.Path(path)).split("/")[-1]
-            path = f"Source: '{p}'"
+            source = self.items[key].get("source")
 
-            venv = self.items[key].get("interpreter")
+            s = str(controller.pathlib.Path(source)).split("/")[-1]
+            source_label = f"Source: '{s}'"
 
-            if venv == "":
-                venv = "Interpreter: 'Global'"
+            interpreter = self.items[key].get("interpreter")
+
+            if interpreter == "":
+                interpreter_label = "Interpreter: 'Global'"
             else:
-                venv_dir_name = str(controller.pathlib.Path(venv)).split("/")[-3]
-                venv_ex_name = str(controller.pathlib.Path(venv)).split("/")[-1]
-                venv = f"Interpreter: '({venv_dir_name}) {venv_ex_name}'"
+                i_dir_name = str(controller.pathlib.Path(interpreter)).split("/")[-3]
+                i_ex_name = str(controller.pathlib.Path(interpreter)).split("/")[-1]
+                interpreter_label = f"Interpreter: '({i_dir_name}) {i_ex_name}'"
 
             item.update(
                 [
@@ -69,16 +71,16 @@ class MenuBarApp(rumps.App):
                         ),
                         [
                             rumps.MenuItem(
-                                f"Name: {name}",
+                                f"{name_label}",
                                 callback=partial(self.edit, self.items[key]),
                             ),
                             rumps.MenuItem(
-                                f"{path}",
-                                callback=partial(self.edit_path, self.items[key]),
+                                f"{source_label}",
+                                # callback=partial(self.edit_path, self.items[key]),
                             ),
                             rumps.MenuItem(
-                                f"{venv}",
-                                callback=partial(self.edit_path, self.items[key]),
+                                f"{interpreter_label}",
+                                # callback=partial(self.edit_path, self.items[key]),
                             ),
                         ],
                     ],
@@ -97,15 +99,25 @@ class MenuBarApp(rumps.App):
             ],
         ]
 
-    def edit(self, item: controller.ScriptItem, _):
+    def edit(self, item: dict, _):
         """
         Opens the user_config.txt file in the default text editor.
 
         :params self: the MenuBarApp object.
         """
-        w = Window()
-        w.__setattr__("icon", "menuscript/resources/imgs/icon.icns")
-        w.run()
+        old_name = item.get("name")
+
+        e = classes.EditName(old_name)
+        e.__setattr__("icon", f"{controller.settings.app_path}/imgs/icon.icns")
+        response = e.run()
+
+        if response.clicked:
+            new_name = response.text
+            top_level_item = self.menu.get(old_name)
+            controller.update_name(self.items.get(old_name), new_name)
+            top_level_item.__setattr__("title", new_name)
+            sub_menu = top_level_item["Edit"]
+            sub_menu.get(f"Name: {old_name}").__setattr__("title", f"Name: {new_name}")
 
     def edit_path(self, item: controller.ScriptItem, sender):
         """

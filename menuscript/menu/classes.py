@@ -283,3 +283,33 @@ class Response(object):
     def text(self):
         """Return the text collected from the user."""
         return self._text
+
+
+class EditName(Window):
+    def __init__(self, name: str):
+        super().__init__(
+            message="",
+            title="",
+            default_text=name,
+            ok="Save Changes",
+            cancel="Cancel",
+            dimensions=(220, 20),
+            secure=False,
+        )
+
+
+class EditSource:
+    def __init__(self, name: str):
+        super().__init__(
+            message="",
+            title="",
+            default_text=name,
+            ok="Rename",
+            cancel="Cancel",
+            dimensions=(220, 20),
+            secure=False,
+        )
+
+
+class EditInterpreter:
+    ...

@@ -189,6 +189,36 @@ def load_items() -> any:
     return items
 
 
+def update_name(item: dict, new_name: str) -> None:
+    """
+    Updates the name of a script item in the config file.
+
+    :param item: the script item to update
+    :param new_name: the new name of the script item
+    """
+
+    if new_name == "":
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Invalid name",
+            message="Script names cannot be empty.",
+        )
+        return
+
+    with open(f"{settings.user_data_path}/config.txt", "r") as f:
+        lines = f.readlines()
+
+    with open(f"{settings.user_data_path}/config.txt", "w") as f:
+        name = item.get("name")
+        source = item.get("source")
+        interpreter = item.get("interpreter")
+        for line in lines:
+            line = line.strip()  # clear whitespace
+            if line.startswith(f"(name)[{name}]"):
+                line = f"(name)[{new_name}](script)[{source}](venv)[{interpreter}]"
+            f.write(f"{line}\n")
+
+
 def execute(item: dict[ScriptItem], _) -> any:
     """
     Execute the script displayed in the menu bar. If a virtual environement is

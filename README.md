@@ -28,7 +28,7 @@
 
 MenuScript is a Python project that uses rumps, a library for creating macOS status bar apps, to run any Python script from the menubar. It provides a convenient way to execute commonly used scripts without needing to open the terminal. If your script requires a virtual environment, you can specify the path to the virtual environment in the config file and then run the script as if it were within the virtual environment. While this project is a personal passion project, it aims to provide a useful tool for streamlining script execution in macOS.
 
-![](https://raw.githubusercontent.com/mubranch/menuscript/master/demo/demo.gif)
+![](https://raw.githubusercontent.com/mubranch/menuscript/master/demo/screenshot-v0.0.3.png)
 
 ## Getting Started <a name = "getting_started"></a>
 

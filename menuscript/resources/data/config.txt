@@ -7,4 +7,4 @@
 # Enter items below without leading '#'
 # ---------------------
 
-(name)[Example](script)[./menuscript/resources/data/get_started/main.py](venv)[]
+(name)[Example](source)[./menuscript/resources/data/get_started/main.py](interpreter)[]

@@ -16,9 +16,10 @@ class MenuBarApp(rumps.App):
     """
 
     def __init__(self, name: str, icon: str, items: list) -> None:
-        super().__init__(name=name, icon=icon)
+        super().__init__(name=name, icon=icon, quit_button=None)
 
         self.items = items
+        self.number_of_executions = controller.load_executions()
         self.init_menu()
 
     def init_menu(self) -> None:
@@ -27,11 +28,15 @@ class MenuBarApp(rumps.App):
 
         :params self: the MenuBarApp object.
         """
+        if self.menu is not None:
+            self.menu.clear()
+
         if self.items is None or len(self.items) == 0:
+            self.items = []
             self.menu = [
                 rumps.MenuItem(
                     "Add new item",
-                    # callback=self.add,
+                    callback=self.add,
                 ),
                 [
                     rumps.MenuItem("More..."),
@@ -41,9 +46,10 @@ class MenuBarApp(rumps.App):
                         rumps.MenuItem("Raise an issue", callback=self.report_issue),
                         rumps.MenuItem("Documentation", callback=self.read_docs),
                         rumps.MenuItem("Reset application", callback=self.reset_app),
-                        rumps.MenuItem("Quit", callback=rumps.quit_application),
                     ],
                 ],
+                rumps.MenuItem("Quit", callback=rumps.quit_application),
+                rumps.MenuItem(f"Count ({self.number_of_executions})"),
             ]
             return
 
@@ -66,7 +72,7 @@ class MenuBarApp(rumps.App):
                     rumps.MenuItem(
                         "Run",
                         key=f"{i}",
-                        callback=partial(controller.execute, item_tuple),
+                        callback=partial(self.execute, item_tuple),
                     ),
                     None,
                     rumps.MenuItem(
@@ -76,12 +82,12 @@ class MenuBarApp(rumps.App):
                     [
                         rumps.MenuItem(
                             "Edit",
-                            callback=partial(self.edit, item_tuple),
+                            callback=partial(self.edit_name, item_tuple),
                         ),
                         [
                             rumps.MenuItem(
                                 f"{name_label}",
-                                callback=partial(self.edit, item_tuple),
+                                callback=partial(self.edit_name, item_tuple),
                             ),
                             rumps.MenuItem(
                                 f"{source_label}",
@@ -101,7 +107,7 @@ class MenuBarApp(rumps.App):
             None,
             rumps.MenuItem(
                 "Add new item",
-                # callback=self.add,
+                callback=self.add,
             ),
             [
                 rumps.MenuItem("More..."),
@@ -113,12 +119,28 @@ class MenuBarApp(rumps.App):
                     rumps.MenuItem("Reset application", callback=self.reset_app),
                 ],
             ],
+            rumps.MenuItem("Quit", callback=rumps.quit_application),
+            rumps.MenuItem(f"Count ({self.number_of_executions})"),
         ]
 
-    def add(self, item: tuple, _):
-        ...
+    def add(self, _):
+        new_item = ("Template", "Assign a source", None)
+        self.items.append(new_item)
+        controller.write_item(new_item)
+        self.init_menu()
 
-    def edit(self, item: tuple, _):
+    def execute(self, item: tuple, _):
+        """
+        Executes the item.
+
+        :params self: the MenuBarApp object.
+        """
+        controller.execute(item)
+        self.menu.pop(f"Count ({self.number_of_executions})")
+        self.number_of_executions = controller.load_executions()
+        self.menu.add(rumps.MenuItem(f"Count ({self.number_of_executions})"))
+
+    def edit_name(self, item: tuple, _):
         """
         Open a dialog to edit the name of the item.
         Removes the old item from self.items and adds the new item.
@@ -135,7 +157,7 @@ class MenuBarApp(rumps.App):
         e.__setattr__("icon", f"{controller.settings.app_path}/imgs/icon.icns")
         response = e.run()
 
-        if response.clicked and response.text != old_name:
+        if response.clicked == 1 and response.text != old_name:
             new_name = response.text
             top_level_item = self.menu.get(old_name)
 
@@ -143,11 +165,13 @@ class MenuBarApp(rumps.App):
 
             if not r:
                 return
+        else:
+            return
 
-            for name, source, interpreter in self.items:
-                if name == old_name:
-                    self.items.remove((old_name, source, interpreter))
-                    break
+        for i, (name, source, interpreter) in enumerate(self.items):
+            if name == old_name:
+                self.items.remove((old_name, source, interpreter))
+                break
 
             new_item = (new_name, source, interpreter)
             self.items.extend(new_item)
@@ -169,7 +193,7 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
         name = item[0]
-        source = item[1]
+        old_source = item[1]
 
         new_source = controller.open_filepicker()
         new_source = new_source.removesuffix("\n")
@@ -178,9 +202,9 @@ class MenuBarApp(rumps.App):
         if not r:
             return
 
-        for name, source, interpreter in self.items:
-            if source == source:
-                self.items.remove((source, source, interpreter))
+        for i, (name, source, interpreter) in enumerate(self.items):
+            if source == old_source:
+                self.items.remove((name, old_source, interpreter))
                 break
 
         new_item = (name, new_source, interpreter)
@@ -199,7 +223,7 @@ class MenuBarApp(rumps.App):
         :params self: the MenuBarApp object.
         """
         name = item[0]
-        interpreter = item[2]
+        old_interpreter = item[2]
 
         new_interpreter = controller.open_interpreter_picker()
         new_interpreter = new_interpreter.removesuffix("\n")
@@ -208,9 +232,9 @@ class MenuBarApp(rumps.App):
         if not r:
             return
 
-        for name, source, interpreter in self.items:
-            if interpreter == interpreter:
-                self.items.remove((name, source, interpreter))
+        for i, (name, source, interpreter) in enumerate(self.items):
+            if interpreter == old_interpreter:
+                self.items.remove((name, source, old_interpreter))
                 break
 
         new_item = (name, source, new_interpreter)

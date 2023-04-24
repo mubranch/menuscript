@@ -55,6 +55,16 @@ def remove_item(item: tuple) -> None:
         )
 
 
+def write_item(item: tuple) -> None:
+    """
+    Writes a script item to the user_config.txt file.
+
+    """
+
+    with open(f"{settings.user_data_path}/.config.txt", "a") as f:
+        f.write(f"(name)[{item[0]}](source)[{item[1]}](interpreter)[]\n")
+
+
 def open_interpreter_picker() -> str:
     cmd = f"python {settings.user_data_path}/.ui/interpreter.py"
     try:
@@ -95,7 +105,21 @@ def move_ui() -> None:
         shutil.copytree(src, dest)
 
 
-def create_config() -> None:
+def increment_execution_count() -> None:
+    with open(f"{settings.user_data_path}/.data.txt", "r") as f:
+        lines = f.readlines()
+
+    with open(f"{settings.user_data_path}/.data.txt", "w") as f:
+        for line in lines:
+            line.strip()
+            if line.startswith("(executions)"):
+                num = line.index(")")
+                string = line[num + 1 :]
+                line = f"(executions){int(string)+1}"
+            f.write(line)
+
+
+def create_user_data() -> None:
     """
     Updates the config file in the user's home folder if it exists; otherwise, creates a
     new one. Copies the default config file from the data folder into the user's home
@@ -117,7 +141,7 @@ def create_config() -> None:
         with open(f"{settings.user_data_path}/.config.txt", "x") as f:
             for line in lines:
                 if line.startswith("(name)"):
-                    line = f"(name)[Example](script)[{settings.user_data_path}/example/main.py](venv)[]"
+                    line = f"(name)[Example](source)[{settings.user_data_path}/example/main.py](interpreter)[]\n"
                 f.write(line)
 
     except PermissionError:
@@ -132,6 +156,14 @@ def create_config() -> None:
     dest = f"{settings.user_data_path}/example"
 
     shutil.copytree(src, dest)
+
+    # copy user data into user home folder
+    src = str(pathlib.Path(f"{settings.data_path}/.data.txt"))
+    dest = f"{settings.user_data_path}/.data.txt"
+
+    shutil.copyfile(src, dest)
+
+    move_ui()
 
 
 def open_config() -> None:
@@ -164,8 +196,7 @@ def load_items() -> any:
     names = set()
 
     if not pathlib.Path(f"{settings.user_data_path}/.config.txt").exists():
-        create_config()
-        move_ui()
+        create_user_data()
 
     with open(f"{settings.user_data_path}/.config.txt", "r") as f:
         lines = f.readlines()
@@ -195,11 +226,11 @@ def load_items() -> any:
             end = line.index("]", start + 1)
             interpreter = line[start + 1 : end]
 
-            if name == "" or not pathlib.Path(source).is_file():
+            if name == "":
                 rumps.notification(
                     title="MenuScript",
                     subtitle="Invalid config file",
-                    message="Scripts must have a name, and the script path must be a valid file path.",
+                    message="Scripts must have a name.",
                 )
                 continue
 
@@ -249,10 +280,22 @@ def update_name(item: tuple, new_name: str) -> bool:
         for line in lines:
             line = line.strip()  # clear whitespace
             if line.startswith(f"(name)[{name}]"):
-                line = f"(name)[{new_name}](script)[{source}](venv)[{interpreter}]"
+                line = (
+                    f"(name)[{new_name}](source)[{source}](interpreter)[{interpreter}]"
+                )
             f.write(f"{line}\n")
 
     return True
+
+
+def load_executions() -> int:
+    with open(f"{settings.user_data_path}/.data.txt", "r") as f:
+        lines = f.readlines()
+
+    for line in lines:
+        if line.startswith("(executions)"):
+            start = line.index(")")
+            return int(line[start + 1 :])
 
 
 def update_source(item: tuple, new_source: str) -> bool:
@@ -273,7 +316,9 @@ def update_source(item: tuple, new_source: str) -> bool:
         for line in lines:
             line = line.strip()  # clear whitespace
             if line.startswith(f"(name)[{name}]"):
-                line = f"(name)[{name}](script)[{new_source}](venv)[{interpreter}]"
+                line = (
+                    f"(name)[{name}](source)[{new_source}](interpreter)[{interpreter}]"
+                )
             f.write(f"{line}\n")
 
     return True
@@ -297,13 +342,15 @@ def update_interpreter(item: tuple, new_interpreter: str) -> bool:
         for line in lines:
             line = line.strip()  # clear whitespace
             if line.startswith(f"(name)[{name}]"):
-                line = f"(name)[{name}](script)[{source}](venv)[{new_interpreter}]"
+                line = (
+                    f"(name)[{name}](source)[{source}](interpreter)[{new_interpreter}]"
+                )
             f.write(f"{line}\n")
 
     return True
 
 
-def execute(item: tuple, _) -> any:
+def execute(item: tuple) -> any:
     """
     Execute the script displayed in the menu bar. If a virtual environement is
     configured in the config.txt file, it will activate the virtual environemnt.
@@ -329,7 +376,11 @@ def execute(item: tuple, _) -> any:
         )
 
     if interpreter is not None:
-        if str(interpreter).lower() == "none" or "." or " ":
+        if (
+            str(interpreter).lower() == "none"
+            or str(interpreter).lower() == "."
+            or str(interpreter).lower() == " "
+        ):
             interpreter = None
 
     # Get script name from source
@@ -345,8 +396,9 @@ def execute(item: tuple, _) -> any:
             rumps.notification(
                 title="MenuScript",
                 subtitle="Running script",
-                message=f"Script executed with message {p.communicate()}",
+                message=f"Script executed with message {p.communicate()[0].decode('utf-8')}",
             )
+            increment_execution_count()
             return
         except Exception as e:
             rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)
@@ -370,6 +422,7 @@ def execute(item: tuple, _) -> any:
             subtitle="Running script",
             message=f"Script executed with message '{msg}'",
         )
+        increment_execution_count()
         return
     except Exception as e:
         rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)

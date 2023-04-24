@@ -49,4 +49,3 @@ if __name__ == "__main__":
 
     Test(master=root).pack()
     root.mainloop()
-    root.destroy()

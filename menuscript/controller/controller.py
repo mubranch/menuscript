@@ -74,6 +74,11 @@ def open_interpreter_picker() -> str:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Interpreter selected",
+            message=f"New interpreter: {get_interpreter_label(p.communicate()[0].decode('utf-8'))}",
+        )
         return p.communicate()[0].decode("utf-8")
     except Exception as e:
         raise (e)
@@ -87,6 +92,11 @@ def open_filepicker() -> str:
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+        )
+        rumps.notification(
+            title="MenuScript",
+            subtitle="Source selected",
+            message=f"New source: {get_source_label(p.communicate()[0].decode('utf-8'))}",
         )
         return p.communicate()[0].decode("utf-8")
     except Exception as e:
@@ -185,6 +195,8 @@ def get_source_label(source: str) -> str:
 
 
 def get_interpreter_label(interpreter: str) -> str:
+    if not interpreter:
+        return "Interpreter: 'Global'"
     i_ex_name = str(pathlib.Path(interpreter)).split("/")[-1]
     return f"Interpreter: '(venv) {i_ex_name}'"
 
@@ -375,7 +387,6 @@ def execute(item: tuple) -> any:
         interpreter = None
 
     # Check if paths in config.txt are valid
-
     if not source.is_file() or not str(source).endswith(".py"):
         raise ValueError(
             "...(script)[path/to/script]... in user config file is not a '.py' file"
@@ -429,16 +440,10 @@ def execute(item: tuple) -> any:
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,
         )
-
-        msg = None
-
-        if p.check_returncode() is None:
-            msg = "Success"
-
         rumps.notification(
             title="MenuScript",
             subtitle="Running script",
-            message=f"Script executed with message '{msg}'",
+            message=f"Script executed with message {p.communicate()[0].decode('utf-8')}",
         )
         increment_execution_count()
         return

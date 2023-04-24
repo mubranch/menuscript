@@ -157,34 +157,74 @@ class MenuBarApp(rumps.App):
         e.__setattr__("icon", f"{controller.settings.app_path}/imgs/icon.icns")
         response = e.run()
 
-        if response.clicked == 1 and response.text != old_name:
-            new_name = response.text
-            top_level_item = self.menu.get(old_name)
-
-            r = controller.update_name((old_name, source, interpreter), new_name)
-
-            if not r:
-                return
-        else:
+        if not response.clicked == 1 and not response.text != old_name:
             return
 
-        for i, (name, source, interpreter) in enumerate(self.items):
+        new_name = response.text  # get new name
+
+        r = controller.update_name(
+            (old_name, source, interpreter), new_name
+        )  # validate new name
+
+        if not r:  # if name is invalid cancel edit
+            return
+
+        for i, (name, source, interpreter) in enumerate(
+            self.items
+        ):  # remove old item from self.items
             if name == old_name:
                 self.items.remove((old_name, source, interpreter))
                 break
 
-            new_item = (new_name, source, interpreter)
-            self.items.extend(new_item)
+        new_item = (new_name, source, interpreter)  # create new item
+        self.items.append(new_item)  # add new item to self.items
 
-            top_level_item.__setattr__("title", new_name)
-            top_level_item.set_callback(
-                callback=partial(controller.execute, new_item),
-                key=top_level_item.__getattribute__("key"),
-            )
-            sub_menu = top_level_item["Edit"]
-            sub_menu.get(controller.get_name_label(old_name)).__setattr__(
-                "title", controller.get_name_label(new_name)
-            )
+        old_menu_item = self.menu.get(
+            old_name
+        )  # remove old menu item or live refresh will not work
+        run = old_menu_item.get("Run")
+
+        self.menu.insert_before(
+            old_menu_item.__getattribute__("title"),
+            rumps.MenuItem(new_name),
+        )  # insert new menu item
+        new_top_level_item = self.menu.get(new_name)
+        new_top_level_item.update(
+            [
+                rumps.MenuItem(
+                    "Run",
+                    key=run.__getattribute__("key"),
+                    callback=partial(self.execute, new_item),
+                ),
+                None,
+                rumps.MenuItem(
+                    "Schedule job",
+                    # callback=partial(controller.schedule_job, self.items[key]),
+                ),
+                [
+                    rumps.MenuItem(
+                        "Edit",
+                        callback=partial(self.edit_name, new_item),
+                    ),
+                    [
+                        rumps.MenuItem(
+                            f"{controller.get_name_label(new_name)}",
+                            callback=partial(self.edit_name, new_item),
+                        ),
+                        rumps.MenuItem(
+                            f"{controller.get_source_label(source)}",
+                            callback=partial(self.edit_source, new_item),
+                        ),
+                        rumps.MenuItem(
+                            f"{controller.get_interpreter_label(interpreter)}",
+                            callback=partial(self.edit_interpreter, new_item),
+                        ),
+                    ],
+                ],
+                rumps.MenuItem("Delete", callback=partial(self.delete, new_item)),
+            ],
+        )
+        self.menu.pop(old_name)  # remove old menu item
 
     def edit_source(self, item: tuple, sender):
         """
@@ -196,11 +236,14 @@ class MenuBarApp(rumps.App):
         old_source = item[1]
 
         new_source = controller.open_filepicker()
-        new_source = new_source.removesuffix("\n")
+        new_source = new_source.removesuffix("\n")  # format path without newline
+
         r = controller.update_source(item, new_source)
 
-        if not r:
+        if not r:  # if source is invalid cancel edit
             return
+
+        top_level_item = self.menu.get(name)
 
         for i, (name, source, interpreter) in enumerate(self.items):
             if source == old_source:
@@ -208,12 +251,44 @@ class MenuBarApp(rumps.App):
                 break
 
         new_item = (name, new_source, interpreter)
-        self.items.extend(new_item)
+        self.items.append(new_item)
 
         top_level_item = self.menu.get(name)
-        sub_menu = top_level_item["Edit"]
-        sub_menu.get(controller.get_source_label(source)).__setattr__(
-            "title", controller.get_source_label(new_source)
+        top_level_item.clear()
+        top_level_item.update(  # build new top level menu item
+            [
+                rumps.MenuItem(
+                    "Run",
+                    key=top_level_item.__getattribute__("key"),
+                    callback=partial(self.execute, new_item),
+                ),
+                None,
+                rumps.MenuItem(
+                    "Schedule job",
+                    # callback=partial(controller.schedule_job, self.items[key]),
+                ),
+                [
+                    rumps.MenuItem(
+                        "Edit",
+                        callback=partial(self.edit_name, new_item),
+                    ),
+                    [
+                        rumps.MenuItem(
+                            f"{controller.get_name_label(name)}",
+                            callback=partial(self.edit_name, new_item),
+                        ),
+                        rumps.MenuItem(
+                            f"{controller.get_source_label(new_source)}",
+                            callback=partial(self.edit_source, new_item),
+                        ),
+                        rumps.MenuItem(
+                            f"{controller.get_interpreter_label(interpreter)}",
+                            callback=partial(self.edit_interpreter, new_item),
+                        ),
+                    ],
+                ],
+                rumps.MenuItem("Delete", callback=partial(self.delete, new_item)),
+            ]
         )
 
     def edit_interpreter(self, item: tuple, _):
@@ -226,24 +301,63 @@ class MenuBarApp(rumps.App):
         old_interpreter = item[2]
 
         new_interpreter = controller.open_interpreter_picker()
-        new_interpreter = new_interpreter.removesuffix("\n")
+        new_interpreter = new_interpreter.removesuffix(
+            "\n"
+        )  # format path without newline
+
         r = controller.update_interpreter(item, new_interpreter)
 
-        if not r:
+        if not r:  # if interpreter is invalid cancel edit
             return
 
-        for i, (name, source, interpreter) in enumerate(self.items):
+        top_level_item = self.menu.get(name)
+
+        for i, (name, source, interpreter) in enumerate(
+            self.items
+        ):  # remove old item from self.items
             if interpreter == old_interpreter:
                 self.items.remove((name, source, old_interpreter))
                 break
 
         new_item = (name, source, new_interpreter)
-        self.items.extend(new_item)
+        self.items.extend(new_item)  # add new item to self.items
 
         top_level_item = self.menu.get(name)
-        sub_menu = top_level_item["Edit"]
-        sub_menu.get(controller.get_interpreter_label(interpreter)).__setattr__(
-            "title", controller.get_interpreter_label(new_interpreter)
+        top_level_item.clear()
+        top_level_item.update(  # build new top level menu item
+            [
+                rumps.MenuItem(
+                    "Run",
+                    key=top_level_item.__getattribute__("key"),
+                    callback=partial(self.execute, new_item),
+                ),
+                None,
+                rumps.MenuItem(
+                    "Schedule job",
+                    # callback=partial(controller.schedule_job, self.items[key]),
+                ),
+                [
+                    rumps.MenuItem(
+                        "Edit",
+                        callback=partial(self.edit_name, new_item),
+                    ),
+                    [
+                        rumps.MenuItem(
+                            f"{controller.get_name_label(name)}",
+                            callback=partial(self.edit_name, new_item),
+                        ),
+                        rumps.MenuItem(
+                            f"{controller.get_source_label(source)}",
+                            callback=partial(self.edit_source, new_item),
+                        ),
+                        rumps.MenuItem(
+                            f"{controller.get_interpreter_label(new_interpreter)}",
+                            callback=partial(self.edit_interpreter, new_item),
+                        ),
+                    ],
+                ],
+                rumps.MenuItem("Delete", callback=partial(self.delete, new_item)),
+            ]
         )
 
     def delete(self, item: tuple, sender):

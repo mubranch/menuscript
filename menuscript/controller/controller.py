@@ -66,13 +66,13 @@ def write_item(item: tuple) -> None:
 
 
 def open_interpreter_picker() -> str:
-    cmd = f"python {settings.user_data_path}/.ui/interpreter.py"
+    command = ["python", f"{settings.user_data_path}/interpreter/main.py"]
     try:
         p = subprocess.Popen(
-            cmd,
+            command,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=True,
         )
         return p.communicate()[0].decode("utf-8")
     except Exception as e:
@@ -80,16 +80,17 @@ def open_interpreter_picker() -> str:
 
 
 def open_filepicker() -> str:
-    cmd = f"python {settings.user_data_path}/.ui/file.py"
+    command = ["python", f"{settings.user_data_path}/file/main.py"]
     try:
         p = subprocess.Popen(
-            cmd,
+            command,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=True,
         )
         return p.communicate()[0].decode("utf-8")
     except Exception as e:
+        print(e)
         raise (e)
 
 
@@ -99,8 +100,13 @@ def move_ui() -> None:
 
     """
     if pathlib.Path(f"{settings.user_data_path}").exists():
-        src = f"{settings.data_path}/ui"
-        dest = f"{settings.user_data_path}/.ui"
+        src = f"{settings.data_path}/file"
+        dest = f"{settings.user_data_path}/file"
+
+        shutil.copytree(src, dest)
+
+        src = f"{settings.data_path}/interpreter"
+        dest = f"{settings.user_data_path}/interpreter"
 
         shutil.copytree(src, dest)
 
@@ -389,10 +395,19 @@ def execute(item: tuple) -> any:
 
     if interpreter:  # will be None or a PoxisPath object
         venv_activate = str(interpreter).split("bin")[0] + "bin/activate"
-        cmd = f"source {venv_activate}; {interpreter} {s_name}"  # Set bash command for Popen
+        cmd = [
+            f"source {venv_activate}",
+            f"{interpreter} {s_name}",
+        ]  # Set bash command for Popen
 
         try:
-            p = subprocess.Popen(cmd, cwd=str(path), stdout=subprocess.PIPE, shell=True)
+            p = subprocess.Popen(
+                cmd,
+                cwd=str(path),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+            )
             rumps.notification(
                 title="MenuScript",
                 subtitle="Running script",
@@ -406,10 +421,13 @@ def execute(item: tuple) -> any:
 
     # If no virtual environment is configured, run script with global python interpreter
     try:
-        p = subprocess.run(
-            [str(pathlib.Path(sys.executable)), s_name],
+        cmd = [str(pathlib.Path(sys.executable)), s_name]
+        p = subprocess.Popen(
+            cmd,
+            cwd=str(path),
             stdout=subprocess.PIPE,
-            cwd=path,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
         )
 
         msg = None

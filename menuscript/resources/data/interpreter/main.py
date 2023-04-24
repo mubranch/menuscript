@@ -7,7 +7,6 @@ def main():
     root.withdraw()
     file = filedialog.askopenfilename()
     print(file)
-    root.destroy()
 
 
 if __name__ == "__main__":

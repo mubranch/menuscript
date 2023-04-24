@@ -1,4 +1,4 @@
-# menuscript/menuscript.py
+#!/menuscript/menuscript.py
 
 from menu.menu import MenuBarApp
 import controller.controller as controller

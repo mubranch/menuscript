@@ -306,7 +306,7 @@ def update_name(item: tuple, new_name: str) -> bool:
     return True
 
 
-def load_executions() -> int:
+def get_num_executions() -> int:
     with open(f"{settings.user_data_path}/.data.txt", "r") as f:
         lines = f.readlines()
 

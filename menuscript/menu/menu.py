@@ -12,19 +12,20 @@ class MenuBarApp(rumps.App):
 
     :param name: name parameter passed to rumps.App init method.
     :param icon: path to the icon of the app.
-    :param items: list of ScriptItem objects loaded from user_config.txt.
+    :param items: list of ScriptItem objects loaded from user config file.
     """
 
     def __init__(self, name: str, icon: str, items: list) -> None:
         super().__init__(name=name, icon=icon, quit_button=None)
 
         self.items = items
-        self.number_of_executions = controller.load_executions()
+        # loads the number of times a script has been executed
+        self.num_executions = controller.get_num_executions()
         self.init_menu()
 
     def init_menu(self) -> None:
         """
-        Refreshes the menu bar with items from user_config.txt.
+        Refreshes the menu bar with items from user config file.
 
         :params self: the MenuBarApp object.
         """
@@ -41,7 +42,7 @@ class MenuBarApp(rumps.App):
                 [
                     rumps.MenuItem("More..."),
                     [
-                        rumps.MenuItem("Bulk edit items", callback=self.bulk_edit),
+                        rumps.MenuItem("Open editor", callback=self.open_config_file),
                         None,
                         rumps.MenuItem("Raise an issue", callback=self.report_issue),
                         rumps.MenuItem("Documentation", callback=self.read_docs),
@@ -49,7 +50,7 @@ class MenuBarApp(rumps.App):
                     ],
                 ],
                 rumps.MenuItem("Quit", callback=rumps.quit_application),
-                rumps.MenuItem(f"Count ({self.number_of_executions})"),
+                rumps.MenuItem(f"Count ({self.num_executions})"),
             ]
             return
 
@@ -97,6 +98,11 @@ class MenuBarApp(rumps.App):
                                 f"{interpreter_label}",
                                 callback=partial(self.edit_interpreter, item_tuple),
                             ),
+                            None,
+                            rumps.MenuItem(
+                                "Open editor",
+                                callback=self.open_config_file,
+                            ),
                         ],
                     ],
                     rumps.MenuItem("Delete", callback=partial(self.delete, item_tuple)),
@@ -112,7 +118,7 @@ class MenuBarApp(rumps.App):
             [
                 rumps.MenuItem("More..."),
                 [
-                    rumps.MenuItem("Bulk edit items", callback=self.bulk_edit),
+                    rumps.MenuItem("Open editor", callback=self.open_config_file),
                     None,
                     rumps.MenuItem("Raise an issue", callback=self.report_issue),
                     rumps.MenuItem("Documentation", callback=self.read_docs),
@@ -120,10 +126,15 @@ class MenuBarApp(rumps.App):
                 ],
             ],
             rumps.MenuItem("Quit", callback=rumps.quit_application),
-            rumps.MenuItem(f"Count ({self.number_of_executions})"),
+            rumps.MenuItem(f"Count ({self.num_executions})"),
         ]
 
     def add(self, _):
+        """
+        Adds a template item to the menu bar. The user can then edit the item without
+        using the config file through use of tkinter popup windows.
+        """
+
         new_item = ("Template", "Assign a source", None)
         self.items.append(new_item)
         controller.write_item(new_item)
@@ -131,23 +142,30 @@ class MenuBarApp(rumps.App):
 
     def execute(self, item: tuple, _):
         """
-        Executes the item.
+        Executes the script associated with the item. Tries to execute the script,
+        if value error is raised, the script fails to execute and the user is
+        notified by the controller.
 
         :params self: the MenuBarApp object.
         """
-        controller.execute(item)
-        self.menu.pop(f"Count ({self.number_of_executions})")
-        self.number_of_executions = controller.load_executions()
-        self.menu.add(rumps.MenuItem(f"Count ({self.number_of_executions})"))
+        if (
+            type(controller.execute(item)) == Exception
+        ):  # evaluates to True if script is executed successfully
+            return
+        self.menu.pop(f"Count ({self.num_executions})")
+        self.num_executions = controller.get_num_executions()
+        self.menu.add(rumps.MenuItem(f"Count ({self.num_executions})"))
 
     def edit_name(self, item: tuple, _):
         """
-        Open a dialog to edit the name of the item.
-        Removes the old item from self.items and adds the new item.
-        Passes the new item to controller.update_name() to update the user_config.txt file.
-        After updating the user_config.txt file, the menu bar is refreshed.
+        Opens a popup to edit the name of the item. If the name is valid, the item is
+        updated in the .menuscript/config file. Updates the instance variable `items`
+        by removing the old item and adding the new item. Then updates the menu to reflect,
+        the change without restarting.
 
-        :params self: the MenuBarApp object.
+        :param self: the MenuBarApp object.
+        :param item: the item to be edited.
+
         """
         old_name = item[0]
         source = item[1]
@@ -160,11 +178,11 @@ class MenuBarApp(rumps.App):
         if not response.clicked == 1 and not response.text != old_name:
             return
 
-        new_name = response.text  # get new name
+        new_name = response.text  # get new name from popup
 
         r = controller.update_name(
             (old_name, source, interpreter), new_name
-        )  # validate new name
+        )  # Validate new name
 
         if not r:  # if name is invalid cancel edit
             return
@@ -187,63 +205,33 @@ class MenuBarApp(rumps.App):
         self.menu.insert_before(
             old_menu_item.__getattribute__("title"),
             rumps.MenuItem(new_name),
-        )  # insert new menu item
-        new_top_level_item = self.menu.get(new_name)
+        )
+        new_top_level_item = self.menu.get(new_name)  # Create new top level menu item
         new_top_level_item.update(
-            [
-                rumps.MenuItem(
-                    "Run",
-                    key=run.__getattribute__("key"),
-                    callback=partial(self.execute, new_item),
-                ),
-                None,
-                rumps.MenuItem(
-                    "Schedule job",
-                    # callback=partial(controller.schedule_job, self.items[key]),
-                ),
-                [
-                    rumps.MenuItem(
-                        "Edit",
-                        callback=partial(self.edit_name, new_item),
-                    ),
-                    [
-                        rumps.MenuItem(
-                            f"{controller.get_name_label(new_name)}",
-                            callback=partial(self.edit_name, new_item),
-                        ),
-                        rumps.MenuItem(
-                            f"{controller.get_source_label(source)}",
-                            callback=partial(self.edit_source, new_item),
-                        ),
-                        rumps.MenuItem(
-                            f"{controller.get_interpreter_label(interpreter)}",
-                            callback=partial(self.edit_interpreter, new_item),
-                        ),
-                    ],
-                ],
-                rumps.MenuItem("Delete", callback=partial(self.delete, new_item)),
-            ],
+            self.create_item_menu(run.__getattribute__("key"), new_item)
         )
         self.menu.pop(old_name)  # remove old menu item
 
-    def edit_source(self, item: tuple, sender):
+    def edit_source(self, item: tuple, _):
         """
-        Opens the user_config.txt file in the default text editor.
+        Opens a tkinter window stored locally in the .menuscript data file which allows,
+        the user to select files locally on their machine. Done outside of the rumps
+        program because there are memory management conflicts between Rumps, tkinter,
+        and python.
 
         :params self: the MenuBarApp object.
         """
+
         name = item[0]
         old_source = item[1]
 
         new_source = controller.open_filepicker()
-        new_source = new_source.removesuffix("\n")  # format path without newline
+        new_source = new_source.removesuffix("\n")  # Format path without newline
 
         r = controller.update_source(item, new_source)
 
-        if not r:  # if source is invalid cancel edit
+        if not r:  # Valid path was selected
             return
-
-        top_level_item = self.menu.get(name)
 
         for i, (name, source, interpreter) in enumerate(self.items):
             if source == old_source:
@@ -255,40 +243,8 @@ class MenuBarApp(rumps.App):
 
         top_level_item = self.menu.get(name)
         top_level_item.clear()
-        top_level_item.update(  # build new top level menu item
-            [
-                rumps.MenuItem(
-                    "Run",
-                    key=top_level_item.__getattribute__("key"),
-                    callback=partial(self.execute, new_item),
-                ),
-                None,
-                rumps.MenuItem(
-                    "Schedule job",
-                    # callback=partial(controller.schedule_job, self.items[key]),
-                ),
-                [
-                    rumps.MenuItem(
-                        "Edit",
-                        callback=partial(self.edit_name, new_item),
-                    ),
-                    [
-                        rumps.MenuItem(
-                            f"{controller.get_name_label(name)}",
-                            callback=partial(self.edit_name, new_item),
-                        ),
-                        rumps.MenuItem(
-                            f"{controller.get_source_label(new_source)}",
-                            callback=partial(self.edit_source, new_item),
-                        ),
-                        rumps.MenuItem(
-                            f"{controller.get_interpreter_label(interpreter)}",
-                            callback=partial(self.edit_interpreter, new_item),
-                        ),
-                    ],
-                ],
-                rumps.MenuItem("Delete", callback=partial(self.delete, new_item)),
-            ]
+        top_level_item.update(
+            self.create_item_menu(top_level_item.__getattribute__("key"), new_item)
         )
 
     def edit_interpreter(self, item: tuple, _):
@@ -320,45 +276,55 @@ class MenuBarApp(rumps.App):
                 break
 
         new_item = (name, source, new_interpreter)
-        self.items.extend(new_item)  # add new item to self.items
+        self.items.append(new_item)
 
         top_level_item = self.menu.get(name)
         top_level_item.clear()
-        top_level_item.update(  # build new top level menu item
+        top_level_item.update(
+            self.create_item_menu(top_level_item.__getattribute__("key"), new_item)
+        )
+
+    def create_item_menu(self, key: str, item: tuple):
+        """
+        Creates a new item menu.
+        """
+        name = item[0]
+        source = item[1]
+        interpreter = item[2]
+
+        return [
+            rumps.MenuItem(
+                "Run",
+                key=key,
+                callback=partial(self.execute, item),
+            ),
+            None,
+            rumps.MenuItem(
+                "Schedule job",
+                # callback=partial(controller.schedule_job, self.items[key]),
+            ),
             [
                 rumps.MenuItem(
-                    "Run",
-                    key=top_level_item.__getattribute__("key"),
-                    callback=partial(self.execute, new_item),
-                ),
-                None,
-                rumps.MenuItem(
-                    "Schedule job",
-                    # callback=partial(controller.schedule_job, self.items[key]),
+                    "Edit",
+                    callback=partial(self.edit_name, item),
                 ),
                 [
                     rumps.MenuItem(
-                        "Edit",
-                        callback=partial(self.edit_name, new_item),
+                        f"{controller.get_name_label(name)}",
+                        callback=partial(self.edit_name, item),
                     ),
-                    [
-                        rumps.MenuItem(
-                            f"{controller.get_name_label(name)}",
-                            callback=partial(self.edit_name, new_item),
-                        ),
-                        rumps.MenuItem(
-                            f"{controller.get_source_label(source)}",
-                            callback=partial(self.edit_source, new_item),
-                        ),
-                        rumps.MenuItem(
-                            f"{controller.get_interpreter_label(new_interpreter)}",
-                            callback=partial(self.edit_interpreter, new_item),
-                        ),
-                    ],
+                    rumps.MenuItem(
+                        f"{controller.get_source_label(source)}",
+                        callback=partial(self.edit_source, item),
+                    ),
+                    rumps.MenuItem(
+                        f"{controller.get_interpreter_label(interpreter)}",
+                        callback=partial(self.edit_interpreter, item),
+                    ),
                 ],
-                rumps.MenuItem("Delete", callback=partial(self.delete, new_item)),
-            ]
-        )
+            ],
+            rumps.MenuItem("Delete", callback=partial(self.delete, item)),
+        ]
 
     def delete(self, item: tuple, sender):
         """
@@ -374,7 +340,7 @@ class MenuBarApp(rumps.App):
         self.menu.clear()
         self.init_menu()
 
-    def bulk_edit(self, _):
+    def open_config_file(self, _):
         """
         Opens the user_config.txt file in the default text editor.
 

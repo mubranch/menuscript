@@ -4,6 +4,9 @@ from menu.menu import MenuBarApp
 import controller.controller as controller
 import resources.settings as settings
 import pathlib
+import logging
+
+
 
 
 def main():
@@ -18,7 +21,9 @@ def main():
     )
 
     menu.run()
+    logging.info("MenuScript started")
 
 
 if __name__ == "__main__":
     main()
+    logging.info("MenuScript ended")

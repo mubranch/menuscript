@@ -5,7 +5,7 @@ import controller.controller as controller
 from functools import partial
 from . import classes
 from logger.logger import _log
-# from controller.controller import _notify_error, _notify_info
+from controller.controller import _notify_error, _notify_info
 
 class MenuBarApp(rumps.App):
     """
@@ -93,6 +93,12 @@ class MenuBarApp(rumps.App):
         """
 
         new_item = ("Template", "Assign a source", None)
+        
+        for item in self.items:
+            if item[0] == "Template":
+                _notify_info("To add a new template item, please edit the name of the existing one.")
+            
+            
         self.items.append(new_item)
         controller.write_item(new_item)
         self.init_menu()
@@ -258,7 +264,7 @@ class MenuBarApp(rumps.App):
             ),
             None,
             rumps.MenuItem(
-                "Schedule job",
+                "Schedule job (soon)",
                 # callback=partial(controller.schedule_job, self.items[key]),
             ),
             [

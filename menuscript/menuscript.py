@@ -8,7 +8,6 @@ import logger.logger as logger
 from logger.logger import _log
 
 
-
 def main():
     paths.init()
     
@@ -16,8 +15,13 @@ def main():
         controller._create_user_data()
     
     logger.init()
+    _log.info("------Initializing MenuScript------")
+    
+    _log.info(f"App path, '{paths.app_path}'")
+    _log.info(f"User data path, '{paths.user_data_path}'")
         
     items = controller.load_items()
+    _log.info(f"Items read: {items} from {paths.user_data_path}")
 
     menu = MenuBarApp(
         name="MenuScript",
@@ -25,9 +29,9 @@ def main():
         items=items,
     )
     
-    _log.info("MenuScript started")
+    _log.info("------MenuScript started------")
     menu.run()
-    _log.info("MenuScript stopped.")
+    _log.info("------MenuScript closed------")
 
 
 

@@ -166,7 +166,6 @@ def _config_to_items(lines: list) -> list:
             
     return items
     
-    
 
 def write_item(item: tuple) -> None:
     """
@@ -203,9 +202,6 @@ def remove_item(item: tuple) -> None:
         _log.error(f"Could not write to config with error: '{str(e)}'")
         _notify_error(f"Could not write to config with error: '{str(e)}'")
         
-
-
-
 
 def schedule_job(item: dict):
     """
@@ -430,6 +426,7 @@ def execute(item: tuple):
     if not source.is_file() or not str(source).endswith(".py"):
         _notify_error("Invalid script source.")
         _log.error("Invalid script source.")
+        return
 
     if interpreter is not None:
         if (

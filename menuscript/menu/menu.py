@@ -4,7 +4,6 @@ import rumps
 import controller.controller as controller
 from functools import partial
 from . import classes
-import logging
 
 class MenuBarApp(rumps.App):
     """
@@ -128,7 +127,7 @@ class MenuBarApp(rumps.App):
         interpreter = item[2]
 
         e = classes.EditName(old_name)
-        e.__setattr__("icon", f"{controller.settings.app_path}/imgs/icon.icns")
+        e.__setattr__("icon", f"{controller.paths.app_path}/imgs/icon.icns")
         response = e.run()
 
         if not response.clicked == 1 and not response.text != old_name:
@@ -296,6 +295,7 @@ class MenuBarApp(rumps.App):
                 break
 
         self.menu.clear()
+        controller.remove_item(item)
         self.init_menu()
 
     def open_config_file(self, _):

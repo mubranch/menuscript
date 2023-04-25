@@ -1,6 +1,6 @@
 # menuscript/controllers/controllers.py
 
-from resources import settings
+from resources import paths
 import rumps
 import sys
 import subprocess
@@ -8,17 +8,16 @@ import os
 import shutil
 import webbrowser
 import pathlib
-import logging
-
+from logger.logger import _log 
 
 class _notify_error: # type: ignore
     def __init__(self, message):
-        self = rumps.notification("MenuScript", "Error", message, icon=str(pathlib.Path(f"{settings.image_path}/icon.icns")))
+        self = rumps.notification("MenuScript", "Error", message, icon=str(pathlib.Path(f"{paths.image_path}/icon.icns")))
  
  
 class _notify_info: # type: ignore
     def __init__(self, message):
-        self = rumps.notification("MenuScript", "Alert", message, icon=str(pathlib.Path(f"{settings.image_path}/icon.icns")))  
+        self = rumps.notification("MenuScript", "Alert", message, icon=str(pathlib.Path(f"{paths.image_path}/icon.icns")))  
 
 
 def _create_user_data() -> None:
@@ -29,45 +28,47 @@ def _create_user_data() -> None:
     """
     
     try:
-        pathlib.Path.mkdir(pathlib.Path(f"{settings.user_data_path}"), exist_ok=False)
+        pathlib.Path.mkdir(pathlib.Path(f"{paths.user_data_path}"), exist_ok=False)
     except Exception as e:
-        logging.info(f"User data already exists at {settings.user_data_path}")
+        _log.info(f"User data already exists at {paths.user_data_path}")
         
     # read default config file from data folder
     try: 
-        with open(f"{settings.data_path}/config.txt", "r") as f:
+        with open(f"{paths.data_path}/config.txt", "r") as f:
             lines = f.readlines()
+            _log.info(f"Read config file from '{paths.data_path}/config.txt'")
             
     except Exception as e:
-        logging.error(f"Failed to read config with error: '{str(e)}'")
+        _log.error(f"Failed to read config with error: '{str(e)}'")
         return
 
     try:
         # write new config into user home folder
-        with open(f"{settings.user_data_path}/.config.txt", "x") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "x") as f:
             for line in lines:
                 if line.startswith("(name)"):
-                    line = f"(name)[Example](source)[{settings.user_data_path}/example/main.py](interpreter)[]\n"
+                    line = f"(name)[Example](source)[{paths.user_data_path}/example/main.py](interpreter)[]\n"
                 f.write(line)
-
+        _log.info(f"Created config file at '{paths.user_data_path}/.config.txt'")
     except Exception as e:
-        logging.error(f"Failed to write config with error: '{str(e)}'")
+        _log.error(f"Failed to write config with error: '{str(e)}'")
         _notify_error(f"Failed to write config with error: '{str(e)}'")
 
     # copy example script into user home folder
-    src = f"{settings.data_path}/example"
-    dest = f"{settings.user_data_path}/example"
+    src = f"{paths.data_path}/example"
+    dest = f"{paths.user_data_path}/example"
 
     shutil.copytree(src, dest)
+    _log.info(f"Created example script at '{paths.user_data_path}/example'")
 
     # copy user data into user home folder
-    src = str(pathlib.Path(f"{settings.data_path}/.data.txt"))
-    dest = f"{settings.user_data_path}/.data.txt"
+    src = str(pathlib.Path(f"{paths.data_path}/.data.txt"))
+    dest = f"{paths.user_data_path}/.data.txt"
 
     shutil.copyfile(src, dest)
+    _log.info(f"Created user data at '{paths.user_data_path}/.data.txt'")
 
     _copy_over_ui()
-    logging.info(f"User data created at {settings.user_data_path}")
 
 
 def _copy_over_ui() -> None:
@@ -75,18 +76,20 @@ def _copy_over_ui() -> None:
     Copy filedialog UI to user .menuscript folder.
 
     """
-    if pathlib.Path(f"{settings.user_data_path}").exists():
-        src = f"{settings.data_path}/file"
-        dest = f"{settings.user_data_path}/file"
+    if pathlib.Path(f"{paths.user_data_path}").exists():
+        src = f"{paths.data_path}/file"
+        dest = f"{paths.user_data_path}/file"
 
         shutil.copytree(src, dest)
+        _log.info(f"Created filedialog UI at '{paths.user_data_path}/file'")
 
-        src = f"{settings.data_path}/interpreter"
-        dest = f"{settings.user_data_path}/interpreter"
+        src = f"{paths.data_path}/interpreter"
+        dest = f"{paths.user_data_path}/interpreter"
 
         shutil.copytree(src, dest)
+        _log.info(f"Created interpreter UI at '{paths.user_data_path}/interpreter'")
     else:
-        logging.error("User data folder does not exist.")
+        _log.error("User data folder does not exist.")
 
 
 def load_items() -> list:
@@ -96,12 +99,12 @@ def load_items() -> list:
     """
 
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "r") as f:
             lines = f.readlines()
     except Exception as e:
-        logging.error(f"Failed to read config with error: '{str(e)}'")
+        _log.error(f"Failed to read config with error: '{str(e)}'")
         _notify_error(f"Failed to read config with error: '{str(e)}'")
-        logging.error("Exiting with error code 1")
+        _log.error("Exiting with error code 1")
         exit(1)
 
     # format config file line to get name, script path, and virtual environment path
@@ -111,7 +114,7 @@ def load_items() -> list:
     if len(items) == 0:
         return []
 
-    logging.info(f"Returning {len(items)} items from config file.")
+    _log.info(f"Returning {len(items)} items from config file.")
     return items
 
 def _config_to_items(lines: list) -> list:
@@ -143,7 +146,7 @@ def _config_to_items(lines: list) -> list:
             interpreter = line[start + 1 : end]
 
             if name == "":
-                logging.error("Invalid config file - scripts must have a name.")
+                _log.error("Invalid config file - scripts must have a name.")
                 rumps.notification(
                     title="MenuScript",
                     subtitle="Invalid config file",
@@ -152,7 +155,7 @@ def _config_to_items(lines: list) -> list:
                 continue
 
             if name in names:
-                logging.info(f"Repeated script name: '{name}' in line: '{i}'")
+                _log.info(f"Repeated script name: '{name}' in line: '{i}'")
                 _notify_info(f"Scripts must have unique names. Repeated script name: '{name}' in line: '{i}'")
 
             if not pathlib.Path(interpreter).is_file():
@@ -171,10 +174,10 @@ def write_item(item: tuple) -> None:
 
     """
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "a") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "a") as f:
             f.write(f"(name)[{item[0]}](source)[{item[1]}](interpreter)[]\n")
     except Exception as e:
-        logging.error(f"Could not write item with error: '{str(e)}'")
+        _log.error(f"Could not write item with error: '{str(e)}'")
         return
 
 
@@ -184,21 +187,20 @@ def remove_item(item: tuple) -> None:
 
     """
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "r") as f:
             lines = f.readlines()
-    except Exception as e:
-        logging.error(f"Could not open config with error: '{str(e)}'")
-        return
 
-    try:
-        with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "w") as f:
             for line in lines:
-                if line.startswith("(name)"):
+                if line.startswith(f"({item[0]})"):
                     continue
                 f.write(line)
+                
+        _log.info(f"Removed item '{item[0]}' from config file.")
+        _notify_info(f"Script '{item[0]}' successfully deleted.")
 
     except Exception as e:
-        logging.error(f"Could not write to config with error: '{str(e)}'")
+        _log.error(f"Could not write to config with error: '{str(e)}'")
         _notify_error(f"Could not write to config with error: '{str(e)}'")
         
 
@@ -223,9 +225,9 @@ def schedule_job(item: dict):
 
 
 def open_interpreter_picker():
-    command = ["python", f"{settings.user_data_path}/interpreter/main.py"]
+    command = [str(pathlib.Path(sys.executable)), f"{paths.user_data_path}/interpreter/main.py"]
     try:
-        logging.info(f"Opening file picker at '{settings.user_data_path}' with command: '{command}'")
+        _log.info(f"Opening file picker at '{paths.user_data_path}' with command: '{command}'")
         p = subprocess.Popen(
             command,
             stdin=subprocess.PIPE,
@@ -233,18 +235,19 @@ def open_interpreter_picker():
             stderr=subprocess.PIPE,
         )
         _notify_info(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
-        logging.info(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
+        _log.info(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
+        _log.info(f"STDOUT: {p.communicate()[1].decode('utf-8')}")
         return p.communicate()[0].decode("utf-8")
         
     except Exception as e:
-        logging.error(f"Failed to open interpreter picker at '{settings.user_data_path}' with error: {str(e)}")
+        _log.error(f"Failed to open interpreter picker at '{paths.user_data_path}' with error: {str(e)}")
         return
 
 
 def open_filepicker():
-    command = ["python", f"{settings.user_data_path}/file/main.py"]
+    command = [str(pathlib.Path(sys.executable)), f"{paths.user_data_path}/file/main.py"]
     try:
-        logging.info(f"Opening file picker at '{settings.user_data_path}' with command: '{command}'")
+        _log.info(f"Opening file picker at '{paths.user_data_path}' with command: '{command}'")
         p = subprocess.Popen(
             command,
             stdin=subprocess.PIPE,
@@ -252,10 +255,12 @@ def open_filepicker():
             stderr=subprocess.PIPE,
         )
         _notify_info(f"New source: {p.communicate()[0].decode('utf-8')}")
-        logging.info(f"New source: {p.communicate()[0].decode('utf-8')}")
+        _log.info(f"New source: {p.communicate()[0].decode('utf-8')}")
+        _log.info(f"STDOUT: {p.communicate()[1].decode('utf-8')}")
+        
         return p.communicate()[0].decode("utf-8")
     except Exception as e:
-        logging.error(f"Failed to open interpreter picker at '{settings.user_data_path}' with error: {str(e)}")
+        _log.error(f"Failed to open interpreter picker at '{paths.user_data_path}' with error: {str(e)}")
         return
 
 
@@ -292,14 +297,14 @@ def update_name(item: tuple, new_name: str) -> bool:
         return False
 
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "r") as f:
             lines = f.readlines()
     except Exception as e:
-        logging.error(f"Could not open config with error: '{str(e)}'")
+        _log.error(f"Could not open config with error: '{str(e)}'")
         return False
 
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "w") as f:
             name = item[0]
             source = item[1]
             interpreter = item[2]
@@ -312,21 +317,21 @@ def update_name(item: tuple, new_name: str) -> bool:
                 f.write(f"{line}\n")
         return True
     except Exception as e:
-        logging.error(f"Could not write to config with error: '{str(e)}'")
+        _log.error(f"Could not write to config with error: '{str(e)}'")
         return False
 
 
 def update_source(item: tuple, new_source: str):
     if new_source == "":
         _notify_error("Script source cannot be empty.")
-        logging.error("Script source cannot be empty.")
+        _log.error("Script source cannot be empty.")
         return False
 
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "r") as f:
             lines = f.readlines()
 
-        with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "w") as f:
             name = item[0]
             interpreter = item[2]
             for line in lines:
@@ -338,7 +343,7 @@ def update_source(item: tuple, new_source: str):
                 f.write(f"{line}\n")
         return True
     except Exception as e:
-        logging.error(f"Could not write to open/write config with error: '{str(e)}'")
+        _log.error(f"Could not write to open/write config with error: '{str(e)}'")
         return False
 
 
@@ -347,10 +352,10 @@ def update_interpreter(item: tuple, new_interpreter: str) -> bool:
         return False
 
     try:
-        with open(f"{settings.user_data_path}/.config.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "r") as f:
             lines = f.readlines()
 
-        with open(f"{settings.user_data_path}/.config.txt", "w") as f:
+        with open(f"{paths.user_data_path}/.config.txt", "w") as f:
             name = item[0]
             source = item[1]
             for line in lines:
@@ -363,14 +368,14 @@ def update_interpreter(item: tuple, new_interpreter: str) -> bool:
 
         return True
     except Exception as e:
-        logging.error(f"Could not write to open/write config with error: '{str(e)}'")
+        _log.error(f"Could not write to open/write config with error: '{str(e)}'")
         return False
 
 
 def get_num_executions():
     
     try:
-        with open(f"{settings.user_data_path}/.data.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.data.txt", "r") as f:
             lines = f.readlines()
 
         for line in lines:
@@ -379,7 +384,7 @@ def get_num_executions():
                 return int(line[start + 1 :])
             
     except Exception as e:
-        logging.error(f"Could not read from data file with error: '{str(e)}'")
+        _log.error(f"Could not read from data file with error: '{str(e)}'")
         return 0
 
 
@@ -387,10 +392,10 @@ def increment_execution_count() -> None:
     
     try:
         
-        with open(f"{settings.user_data_path}/.data.txt", "r") as f:
+        with open(f"{paths.user_data_path}/.data.txt", "r") as f:
             lines = f.readlines()
 
-        with open(f"{settings.user_data_path}/.data.txt", "w") as f:
+        with open(f"{paths.user_data_path}/.data.txt", "w") as f:
             for line in lines:
                 line.strip()
                 if line.startswith("(executions)"):
@@ -400,7 +405,7 @@ def increment_execution_count() -> None:
                 f.write(line)
                 
     except Exception as e:
-        logging.error(f"Could not read from/write to data file with error: '{str(e)}'")
+        _log.error(f"Could not read from/write to data file with error: '{str(e)}'")
         return
 
 
@@ -425,7 +430,7 @@ def execute(item: tuple):
     # Check if paths in config.txt are valid
     if not source.is_file() or not str(source).endswith(".py"):
         _notify_error("Invalid script source.")
-        logging.error("Invalid script source.")
+        _log.error("Invalid script source.")
 
     if interpreter is not None:
         if (
@@ -447,6 +452,9 @@ def execute(item: tuple):
         ]  # Set bash command for Popen
 
         try:
+            _log.info(f"Executing script: '{item[0]}'")
+            _log.info(f"Executing command: '{cmd}'")
+            
             p = subprocess.Popen(
                 cmd,
                 cwd=str(path),
@@ -454,20 +462,23 @@ def execute(item: tuple):
                 stderr=subprocess.PIPE,
                 stdin=subprocess.PIPE,
             )
-            rumps.notification(
-                title="MenuScript",
-                subtitle="Running script",
-                message=f"Script executed with message {p.communicate()[0].decode('utf-8')}",
-            )
+            _notify_info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
+            _log.info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
+            
             increment_execution_count()
             return
         except Exception as e:
-            rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)
+            _log.error(f"Could not execute script with error: '{str(e)}'")
+            _notify_error(f"Could not execute script with error: '{str(e)}'")
             return e
 
     # If no virtual environment is configured, run script with global python interpreter
     try:
         cmd = [str(pathlib.Path(sys.executable)), s_name]
+        
+        _log.info(f"Executing script: '{item[0]}'")
+        _log.info(f"Executing command: '{cmd}'")
+        
         p = subprocess.Popen(
             cmd,
             cwd=str(path),
@@ -475,23 +486,22 @@ def execute(item: tuple):
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,
         )
-        rumps.notification(
-            title="MenuScript",
-            subtitle="Running script",
-            message=f"Script executed with message {p.communicate()[0].decode('utf-8')}",
-        )
+        _notify_info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
+        _log.info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
+        
         increment_execution_count()
         return
     except Exception as e:
-        rumps.notification(title="MenuScript", subtitle="Error", message=e.__str__)
-        return e
+        _log.error(f"Could not execute script with error: '{str(e)}'")
+        _notify_error(f"Could not execute script with error: '{str(e)}'")
+        return
 
 
 def open_config() -> None:
     """
     Opens the config file in the user's config file with the default text editor.
     """
-    subprocess.Popen(["open", f"{settings.user_data_path}/.config.txt"])
+    subprocess.Popen(["open", f"{paths.user_data_path}/.config.txt"])
     
     
 def open_url(url: str = "https://www.github.com/mubranch") -> None:
@@ -505,7 +515,7 @@ def reset() -> None:
     """
     Remove script and config files from user home folder.
     """
-    shutil.rmtree(settings.user_data_path)
+    shutil.rmtree(paths.user_data_path)
     rumps.notification(
         title="MenuScript",
         subtitle="Reset",

@@ -2,28 +2,33 @@
 
 from menu.menu import MenuBarApp
 import controller.controller as controller
-import resources.settings as settings
+from resources import paths
 import pathlib
-import logging
-
+import logger.logger as logger
+from logger.logger import _log
 
 
 
 def main():
-    settings.init()
-
+    paths.init()
+    
+    if not paths.user_data_path.exists():
+        controller._create_user_data()
+    
+    logger.init()
+        
     items = controller.load_items()
 
     menu = MenuBarApp(
         name="MenuScript",
-        icon=str(pathlib.Path(f"{settings.image_path}/light.icns")),
+        icon=str(pathlib.Path(f"{paths.image_path}/light.icns")),
         items=items,
     )
-
+    
+    _log.info("MenuScript started")
     menu.run()
-    logging.info("MenuScript started")
+
 
 
 if __name__ == "__main__":
     main()
-    logging.info("MenuScript ended")

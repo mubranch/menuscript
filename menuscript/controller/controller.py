@@ -289,11 +289,8 @@ def update_name(item: tuple, new_name: str) -> bool:
     """
 
     if new_name == "":
-        rumps.notification(
-            title="MenuScript",
-            subtitle="Invalid name",
-            message="Script names cannot be empty.",
-        )
+        _notify_info("Name cannot be empty.")
+        _log.info("Name cannot be empty. Name update failed.")
         return False
 
     try:
@@ -402,7 +399,9 @@ def increment_execution_count() -> None:
                     num = line.index(")")
                     string = line[num + 1 :]
                     line = f"(executions){int(string)+1}"
+                    _log.info(f"Incremented execution count to '({int(string)+1})'")
                 f.write(line)
+        
                 
     except Exception as e:
         _log.error(f"Could not read from/write to data file with error: '{str(e)}'")
@@ -516,11 +515,8 @@ def reset() -> None:
     Remove script and config files from user home folder.
     """
     shutil.rmtree(paths.user_data_path)
-    rumps.notification(
-        title="MenuScript",
-        subtitle="Reset",
-        message="Reset complete. Restart MenuScript for changes to take effect",
-    )
+    _log.info(f"{paths.user_data_path} removed.")
+    _notify_info("Reseting MenuScript...")
 
 
 def restart(self) -> None:
@@ -528,5 +524,5 @@ def restart(self) -> None:
     Restart MenuScript.
     """
     os.execl(
-        sys.executable, os.path.abspath(__file__), *sys.argv
+        pathlib.Path(sys.executable), os.path.abspath(__file__), *sys.argv
     )  # restarts the MenuScript

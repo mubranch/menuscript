@@ -1,4 +1,4 @@
-#!/menuscript/menuscript.py
+# menuscript/menuscript.py
 
 from menu.menu import MenuBarApp
 import controller.controller as controller
@@ -27,6 +27,7 @@ def main():
     
     _log.info("MenuScript started")
     menu.run()
+    _log.info("MenuScript stopped.")
 
 
 

@@ -1,3 +1,5 @@
+# menuscript/logger/logger.py
+
 import logging
 from resources import paths as paths
 import pathlib

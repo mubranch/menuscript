@@ -4,6 +4,8 @@ import rumps
 import controller.controller as controller
 from functools import partial
 from . import classes
+from logger.logger import _log
+# from controller.controller import _notify_error, _notify_info
 
 class MenuBarApp(rumps.App):
     """

@@ -21,8 +21,10 @@
 ## Table of Contents
 
 - [About](#about)
-- [Getting Started](#getting_started)
-- [Editing Scripts](#editing_scripts)
+- [Demo](#demo)
+- [Installation Guide](#installation)
+- [Editing Scripts with GUI](#editing_scripts_gui)
+- [Editing Scripts with Config](#editing_scripts_config)
 
 ## About <a name = "about"></a>
 
@@ -30,19 +32,34 @@ MenuScript is a Python project that uses rumps, a library for creating macOS sta
 
 ![](https://raw.githubusercontent.com/mubranch/menuscript/master/demo/screenshot-v0.0.3.png)
 
-## Getting Started <a name = "getting_started"></a>
+
+# Demo <a name = "demo"></a>
+
+![](https://raw.githubusercontent.com/mubranch/menuscript/master/demo/demo-v0.0.3.gif)
+
+
+## Installation Guide <a name = "installation"></a>
 
 To install and use MenuScript on macOS, follow these steps:
 
 1. Go to the releases page of the MenuScript project and download the latest release.
 2. Move the downloaded release to your Applications folder.
 3. Run MenuScript as you would any other macOS application.
+4. (Reccommended) Enable notifications by going to System Preferences -> Notifications -> MenuScript and selecting 'Alerts' for the alert style. This will allow you to see the output of your scripts in a notification popup.
 
 If you encounter issues with scripts failing to run, ensure that MenuScript has the necessary permissions. You can grant these permissions by going to System Preferences -> Security & Privacy -> Privacy -> Accessibility, and adding MenuScript to the list of applications allowed to control your computer.
 
-## Editing Scripts <a name = "editing_scripts"></a>
+## Editing Scripts with GUI <a name = "editing_scripts_gui"></a>
 
-To edit scripts in MenuScript, open the application and click the 'Edit Scripts' button. This will open the config file in your default text editor. You can add new scripts by adding a new line in the following format:
+To edit scripts via GUI, open the application and click 'Script Name' > 'Edit' > and select the attribute you want to edit.
+
+1. Clicking name will allow you to edit the name of the script via a popup text field. Click 'Save changes' to save the changes.
+2. Clicking source will allow you to edit the source via filepicker. Select the .py file and click 'Open' to save the changes. To Cancel, click 'Cancel'.
+3. Clicking interpreter will allow you to edit the virtual environment via filepicker. Select the python executable that should execute the script and click 'Open' to save the changes. To Cancel, click 'Cancel'.
+
+## Editing Scripts via Config <a name = "editing_scripts_config"></a>
+
+To edit scripts in MenuScript, open the application and click 'More...' > 'Open editor'. This will open the config file in your default text editor. You can add new scripts by adding a new line in the following format:
 
 ```
 (name)[AnythingYouWant](script)(Absolute/path/to/script.py)(venv)(Absolute/path/to/venv/bin/pythonexecutable)
@@ -72,6 +89,8 @@ To add MenuScript to your login items, follow these steps:
 
 1. Python 3 must be installed on your macOS system.
 2. The application is designed to work specifically on macOS.
+
+Tested on MacBook Air M2 and Mac Mini M1, MacOS Ventura 13.3.1 with Python 3.11, if you encounter any problems, please open an issue in the GitHub repository. This application should be compatible with older versions of macOS and Python. 
 
 ## Installing
 

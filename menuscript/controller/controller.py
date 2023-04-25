@@ -459,8 +459,13 @@ def execute(item: tuple):
                 stderr=subprocess.PIPE,
                 stdin=subprocess.PIPE,
             )
-            _notify_info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
-            _log.info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
+            
+            if p.communicate()[0].decode('utf-8') == "":
+                msg = "Script executed successfully."
+            else:
+                msg = f"Script executed with message '{p.communicate()[0].decode('utf-8')}'"
+            _notify_info(msg)
+            _log.info(f"Script executed with message '{p.communicate()[0].decode('utf-8')}'")
             
             increment_execution_count()
             return
@@ -483,8 +488,13 @@ def execute(item: tuple):
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,
         )
-        _notify_info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
-        _log.info(f"Script executed with message {p.communicate()[0].decode('utf-8')}")
+        
+        if p.communicate()[0].decode('utf-8') == "":
+            msg = "Script executed successfully."
+        else:
+            msg = f"Script executed with message '{p.communicate()[0].decode('utf-8')}'"
+        _notify_info(msg)
+        _log.info(f"Script executed with message '{p.communicate()[0].decode('utf-8')}'")
         
         increment_execution_count()
         return

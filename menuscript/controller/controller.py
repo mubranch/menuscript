@@ -9,6 +9,7 @@ import shutil
 import webbrowser
 import pathlib
 from logger.logger import _log 
+import time
 
 class _notify_error: # type: ignore
     def __init__(self, message):
@@ -513,7 +514,9 @@ def reset() -> None:
     """
     shutil.rmtree(paths.user_data_path)
     _log.info(f"{paths.user_data_path} removed.")
-    _notify_info("Reseting MenuScript...")
+    _notify_info("Menuscript reset. Quitting...")
+    time.sleep(2)
+    exit(0)
 
 
 def restart(self) -> None:

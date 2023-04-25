@@ -97,6 +97,7 @@ class MenuBarApp(rumps.App):
         for item in self.items:
             if item[0] == "Template":
                 _notify_info("To add a new template item, please edit the name of the existing one.")
+                return
             
             
         self.items.append(new_item)

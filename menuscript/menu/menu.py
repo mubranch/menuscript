@@ -5,7 +5,7 @@ import controller.controller as controller
 from functools import partial
 from . import classes
 from logger.logger import _log
-from controller.controller import _notify_error, _notify_info
+from controller.controller import Error_, Info_
 
 class MenuBarApp(rumps.App):
     """
@@ -92,11 +92,11 @@ class MenuBarApp(rumps.App):
         using the config file through use of tkinter popup windows.
         """
 
-        new_item = ("Template", "Assign a source", None)
+        new_item = ("Template", "Assign a source", controller.get_global_interpreter())
         
         for item in self.items:
             if item[0] == "Template":
-                _notify_info("To add a new template item, please edit the name of the existing one.")
+                Info_("To add a new template item, please edit the name of the existing one.")
                 return
             
             

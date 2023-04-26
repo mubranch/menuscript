@@ -11,17 +11,17 @@ import pathlib
 from logger.logger import _log 
 import time
 
-class _notify_error: # type: ignore
+class Error_: # type: ignore
     def __init__(self, message):
         self = rumps.notification("MenuScript", "Error", message, icon=str(pathlib.Path(f"{paths.image_path}/icon.icns")))
  
  
-class _notify_info: # type: ignore
+class Info_: # type: ignore
     def __init__(self, message):
         self = rumps.notification("MenuScript", "Alert", message, icon=str(pathlib.Path(f"{paths.image_path}/icon.icns")))  
 
 
-def _create_user_data() -> None:
+def create_user_data() -> None:
     """
     Updates the config file in the user's home folder if it exists; otherwise, creates a
     new one. Copies the default config file from the data folder into the user's home
@@ -48,12 +48,12 @@ def _create_user_data() -> None:
         with open(f"{paths.user_data_path}/.config.txt", "x") as f:
             for line in lines:
                 if line.startswith("(name)"):
-                    line = f"(name)[Example](source)[{paths.user_data_path}/example/main.py](interpreter)[]\n"
+                    line = f"(name)[Example](source)[{paths.user_data_path}/example/main.py](interpreter)[{get_global_interpreter()}]\n"
                 f.write(line)
         _log.info(f"Created config file at '{paths.user_data_path}/.config.txt'")
     except Exception as e:
         _log.error(f"Failed to write config with error: '{str(e)}'")
-        _notify_error(f"Failed to write config with error: '{str(e)}'")
+        Error_(f"Failed to write config with error: '{str(e)}'")
 
     # copy example script into user home folder
     src = f"{paths.data_path}/example"
@@ -104,13 +104,13 @@ def load_items() -> list:
             lines = f.readlines()
     except Exception as e:
         _log.error(f"Failed to read config with error: '{str(e)}'")
-        _notify_error(f"Failed to read config with error: '{str(e)}'")
+        Error_(f"Failed to read config with error: '{str(e)}'")
         _log.error("Exiting with error code 1")
         exit(1)
 
     # format config file line to get name, script path, and virtual environment path
 
-    items = _config_to_items(lines)
+    items = config_to_items(lines)
 
     if len(items) == 0:
         return []
@@ -118,7 +118,7 @@ def load_items() -> list:
     _log.info(f"Returning {len(items)} items from config file.")
     return items
 
-def _config_to_items(lines: list) -> list:
+def config_to_items(lines: list) -> list:
     items = []
     names = set()
     
@@ -157,9 +157,9 @@ def _config_to_items(lines: list) -> list:
 
             if name in names:
                 _log.info(f"Repeated script name: '{name}' in line: '{i}'")
-                _notify_info(f"Scripts must have unique names. Repeated script name: '{name}' in line: '{i}'")
+                Info_(f"Scripts must have unique names. Repeated script name: '{name}' in line: '{i}'")
 
-            if not pathlib.Path(interpreter).is_file():
+            if not pathlib.Path(interpreter).exists():
                 interpreter = None
 
             names.add(name)
@@ -197,11 +197,11 @@ def remove_item(item: tuple) -> None:
                 f.write(line)
                 
         _log.info(f"Removed item '{item[0]}' from config file.")
-        _notify_info(f"Script '{item[0]}' successfully deleted.")
+        Info_(f"Script '{item[0]}' successfully deleted.")
 
     except Exception as e:
         _log.error(f"Could not write to config with error: '{str(e)}'")
-        _notify_error(f"Could not write to config with error: '{str(e)}'")
+        Error_(f"Could not write to config with error: '{str(e)}'")
         
 
 def schedule_job(item: dict):
@@ -231,7 +231,7 @@ def open_interpreter_picker():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        _notify_info(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
+        Info_(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"STDOUT: {p.communicate()[1].decode('utf-8')}")
         return p.communicate()[0].decode("utf-8")
@@ -251,7 +251,7 @@ def open_filepicker():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        _notify_info(f"New source: {p.communicate()[0].decode('utf-8')}")
+        Info_(f"New source: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"New source: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"STDOUT: {p.communicate()[1].decode('utf-8')}")
         
@@ -267,10 +267,10 @@ def get_source_label(source: str) -> str:
 
 
 def get_interpreter_label(interpreter: str) -> str:
-    if not interpreter:
-        return "Interpreter: 'Global'"
-    i_ex_name = str(pathlib.Path(interpreter)).split("/")[-1]
-    return f"Interpreter: '(venv) {i_ex_name}'"
+    exec_name = str(pathlib.Path(interpreter)).split("/")[-1]
+    if interpreter.split("/")[1].lower() == "library":
+        return f"Interpreter: '(Global) {exec_name}'"
+    return f"Interpreter: '(venv) {exec_name}'"
 
 
 def get_name_label(name: str) -> str:
@@ -286,7 +286,7 @@ def update_name(item: tuple, new_name: str) -> bool:
     """
 
     if new_name == "":
-        _notify_info("Name cannot be empty.")
+        Info_("Name cannot be empty.")
         _log.info("Name cannot be empty. Name update failed.")
         return False
 
@@ -317,7 +317,7 @@ def update_name(item: tuple, new_name: str) -> bool:
 
 def update_source(item: tuple, new_source: str):
     if new_source == "":
-        _notify_error("Script source cannot be empty.")
+        Error_("Script source cannot be empty.")
         _log.error("Script source cannot be empty.")
         return False
 
@@ -341,8 +341,8 @@ def update_source(item: tuple, new_source: str):
         return False
 
 
-def update_interpreter(item: tuple, new_interpreter: str) -> bool:
-    if new_interpreter == "":
+def update_interpreter(item: tuple, new_interpreter: str | None) -> bool:
+    if new_interpreter == "" or new_interpreter == None:
         return False
 
     try:
@@ -413,7 +413,7 @@ def execute(item: tuple):
 
     :param item: ScriptItem object
     """
-
+    name = item[0]
     source = item[1]
     source = pathlib.Path(source)
     interpreter = item[2]
@@ -425,7 +425,7 @@ def execute(item: tuple):
 
     # Check if paths in config.txt are valid
     if not source.is_file() or not str(source).endswith(".py"):
-        _notify_error("Invalid script source.")
+        Error_("Invalid script source.")
         _log.error("Invalid script source.")
         return
 
@@ -460,22 +460,27 @@ def execute(item: tuple):
                 stdin=subprocess.PIPE,
             )
             
-            if p.communicate()[0].decode('utf-8') == "":
+            if p.communicate()[1].decode('utf-8') == "":
                 msg = "Script executed successfully."
             else:
-                msg = f"Script executed with message '{p.communicate()[0].decode('utf-8')}'"
-            _notify_info(msg)
-            _log.info(f"Script executed with message '{p.communicate()[0].decode('utf-8')}'")
-            
+                msg = f"Script '{name}' executed with message: '{p.communicate()[1].decode('utf-8')}'"
+                Error_(msg)
+                _log.error(msg)
+                return
+                
+            Info_(msg)
+            _log.info(msg)
             increment_execution_count()
             return
         except Exception as e:
             _log.error(f"Could not execute script with error: '{str(e)}'")
-            _notify_error(f"Could not execute script with error: '{str(e)}'")
+            Error_(f"Could not execute script with error: '{str(e)}'")
             return e
 
     # If no virtual environment is configured, run script with global python interpreter
     try:
+        update_interpreter(item, get_global_interpreter())
+        
         cmd = [str(pathlib.Path(sys.executable)), s_name]
         
         _log.info(f"Executing script: '{item[0]}'")
@@ -489,21 +494,38 @@ def execute(item: tuple):
             stdin=subprocess.PIPE,
         )
         
-        if p.communicate()[0].decode('utf-8') == "":
+        if p.communicate()[1].decode('utf-8') == "":
             msg = "Script executed successfully."
         else:
-            msg = f"Script executed with message '{p.communicate()[0].decode('utf-8')}'"
-        _notify_info(msg)
-        _log.info(f"Script executed with message '{p.communicate()[0].decode('utf-8')}'")
+            msg = f"Script '{name}' executed with message: '{p.communicate()[1].decode('utf-8')}'"
+            Error_(msg)
+            _log.error(msg)
+            return
+                
+        Info_(msg)
+        _log.info(msg)
         
         increment_execution_count()
         return
     except Exception as e:
         _log.error(f"Could not execute script with error: '{str(e)}'")
-        _notify_error(f"Could not execute script with error: '{str(e)}'")
+        Error_(f"Could not execute script with error: '{str(e)}'")
         return
 
+def get_global_interpreter() -> str | None:
+    sys_list = [item for item in sys.path if "python" in item.split("/")[-1]]
+    
+    for path in sys_list:
+        try:       
+            p = int(path.split("/")[-1][-1])
+            return path
+        except ValueError:
+            continue
+    
+    return None
 
+    
+    
 def open_config() -> None:
     """
     Opens the config file in the user's config file with the default text editor.
@@ -524,7 +546,7 @@ def reset() -> None:
     """
     shutil.rmtree(paths.user_data_path)
     _log.info(f"{paths.user_data_path} removed.")
-    _notify_info("Menuscript reset. Quitting...")
+    Info_("Menuscript reset. Quitting...")
     time.sleep(2)
     exit(0)
 

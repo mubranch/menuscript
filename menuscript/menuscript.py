@@ -12,7 +12,7 @@ def main():
     paths.init()
     
     if not paths.user_data_path.exists():
-        controller._create_user_data()
+        controller.create_user_data()
     
     logger.init()
     _log.info("------Initializing MenuScript------")

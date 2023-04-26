@@ -231,6 +231,9 @@ def open_interpreter_picker():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        if p.communicate()[0].decode('utf-8') == "":
+            return
+        
         Info_(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"New interpreter: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"STDOUT: {p.communicate()[1].decode('utf-8')}")
@@ -251,6 +254,9 @@ def open_filepicker():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        if p.communicate()[0].decode('utf-8') == "":
+            return
+        
         Info_(f"New source: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"New source: {p.communicate()[0].decode('utf-8')}")
         _log.info(f"STDOUT: {p.communicate()[1].decode('utf-8')}")
@@ -513,7 +519,7 @@ def execute(item: tuple):
         return
 
 def get_global_interpreter() -> str | None:
-    sys_list = [item for item in sys.path if "python" in item.split("/")[-1]]
+    sys_list = [item for item in sys.path if "python" in item.split("/")[-1] and "Applications" not in item]
     
     for path in sys_list:
         try:       
